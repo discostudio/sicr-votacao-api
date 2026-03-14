@@ -1,8 +1,7 @@
 package org.fhc.sicrvotacaoapi.exception;
 
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import lombok.extern.slf4j.Slf4j;
-import org.fhc.sicrvotacaoapi.dto.ErrorResponseDTO;
+import org.fhc.sicrvotacaoapi.dto.error.ErrorResponseDTO;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -85,59 +84,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
-    // Tratamento da Sessão já aberta
-    @ExceptionHandler(SessaoJaAbertaException.class)
-    public ResponseEntity<ErrorResponseDTO> handleSessaoJaAberta(SessaoJaAbertaException ex) {
-        Map<String, String> fieldErrors = new HashMap<>();
-        fieldErrors.put("pautaId", ex.getMessage());
-
-        ErrorResponseDTO error = new ErrorResponseDTO("Erro ao abrir sessão", fieldErrors);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
-    }
-
-    // Tratamento de pauta não encontrada
-    @ExceptionHandler(PautaNaoEncontradaException.class)
-    public ResponseEntity<ErrorResponseDTO> handlePautaNaoEncontrada(PautaNaoEncontradaException ex) {
-        Map<String, String> fieldErrors = new HashMap<>();
-        fieldErrors.put("pautaId", ex.getMessage());
-
-        ErrorResponseDTO error = new ErrorResponseDTO("Erro ao realizar operação.", fieldErrors);
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
-    }
-
-    // Sessão não encontrada
-    @ExceptionHandler(SessaoNaoEncontradaException.class)
-    public ResponseEntity<ErrorResponseDTO> handleSessaoNaoEncontrada(SessaoNaoEncontradaException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponseDTO(ex.getMessage(), Map.of()));
-    }
-
-    // Pauta sem sessões abertas
-    @ExceptionHandler(PautaSemSessoesAbertasException.class)
-    public ResponseEntity<ErrorResponseDTO> handlePautaSemSessoesAbertas(PautaSemSessoesAbertasException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponseDTO(ex.getMessage(), Map.of()));
-    }
-
-    // Pauta sem sessões
-    @ExceptionHandler(PautaSemSessoesException.class)
-    public ResponseEntity<ErrorResponseDTO> handlePautaSemSessoes(PautaSemSessoesException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponseDTO(ex.getMessage(), Map.of()));
-    }
-
-    // Associado já votou
-    @ExceptionHandler(AssociadoJaVotouException.class)
-    public ResponseEntity<ErrorResponseDTO> handleAssociadoJaVotou(AssociadoJaVotouException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new ErrorResponseDTO(ex.getMessage(), Map.of()));
-    }
-
-    // Voto inválido
-    @ExceptionHandler(VotoInvalidoException.class)
-    public ResponseEntity<ErrorResponseDTO> handleVotoInvalido(VotoInvalidoException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponseDTO(ex.getMessage(), Map.of()));
+    // Mensagens de negócio
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ErrorResponseDTO> handleBusiness(BusinessException ex) {
+        ErrorResponseDTO response = new ErrorResponseDTO(
+                ex.getMessage(),
+                ex.getFieldErrors()
+        );
+        return ResponseEntity.status(ex.getStatus()).body(response);
     }
 
     // Erro de integridade no banco - importante para casos de unique constraints (tabela Voto, por exemplo)

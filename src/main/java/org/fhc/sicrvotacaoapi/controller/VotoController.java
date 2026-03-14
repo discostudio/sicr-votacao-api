@@ -1,8 +1,8 @@
 package org.fhc.sicrvotacaoapi.controller;
 
 import jakarta.validation.Valid;
-import org.fhc.sicrvotacaoapi.dto.VotoRequestDTO;
-import org.fhc.sicrvotacaoapi.dto.VotoResponseDTO;
+import org.fhc.sicrvotacaoapi.dto.voto.VotoRequestDTO;
+import org.fhc.sicrvotacaoapi.dto.voto.VotoResponseDTO;
 import org.fhc.sicrvotacaoapi.service.VotoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

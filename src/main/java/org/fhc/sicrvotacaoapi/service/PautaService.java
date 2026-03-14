@@ -1,8 +1,8 @@
 package org.fhc.sicrvotacaoapi.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.fhc.sicrvotacaoapi.dto.PautaRequestDTO;
-import org.fhc.sicrvotacaoapi.dto.PautaResponseDTO;
+import org.fhc.sicrvotacaoapi.dto.pauta.PautaRequestDTO;
+import org.fhc.sicrvotacaoapi.dto.pauta.PautaResponseDTO;
 import org.fhc.sicrvotacaoapi.model.Pauta;
 import org.fhc.sicrvotacaoapi.repository.PautaRepository;
 import org.springframework.stereotype.Service;

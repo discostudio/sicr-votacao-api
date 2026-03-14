@@ -1,4 +1,4 @@
-package org.fhc.sicrvotacaoapi.dto;
+package org.fhc.sicrvotacaoapi.dto.error;
 
 import java.util.Map;
 

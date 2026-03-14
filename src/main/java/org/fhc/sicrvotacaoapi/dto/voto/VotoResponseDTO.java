@@ -1,4 +1,4 @@
-package org.fhc.sicrvotacaoapi.dto;
+package org.fhc.sicrvotacaoapi.dto.voto;
 
 import org.fhc.sicrvotacaoapi.model.Voto;
 

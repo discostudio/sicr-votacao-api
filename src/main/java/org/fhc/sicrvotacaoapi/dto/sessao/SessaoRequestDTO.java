@@ -1,7 +1,6 @@
-package org.fhc.sicrvotacaoapi.dto;
+package org.fhc.sicrvotacaoapi.dto.sessao;
 
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record SessaoRequestDTO(@NotNull(message = "Id da pauta é obrigatório")

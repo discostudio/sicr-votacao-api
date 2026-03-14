@@ -1,20 +1,20 @@
 package org.fhc.sicrvotacaoapi.service;
 
-import org.fhc.sicrvotacaoapi.dto.ResultadoSessaoDTO;
-import org.fhc.sicrvotacaoapi.dto.ResultadoVotacaoConsolidadoDTO;
-import org.fhc.sicrvotacaoapi.dto.ResultadoVotacaoDTO;
-import org.fhc.sicrvotacaoapi.exception.PautaNaoEncontradaException;
-import org.fhc.sicrvotacaoapi.exception.PautaSemSessoesException;
-import org.fhc.sicrvotacaoapi.model.Pauta;
+import org.fhc.sicrvotacaoapi.dto.resultado.ResultadoSessaoDTO;
+import org.fhc.sicrvotacaoapi.dto.resultado.ResultadoVotacaoConsolidadoDTO;
+import org.fhc.sicrvotacaoapi.dto.resultado.ResultadoVotacaoDTO;
+import org.fhc.sicrvotacaoapi.exception.BusinessException;
 import org.fhc.sicrvotacaoapi.model.ResultadoVotacao;
 import org.fhc.sicrvotacaoapi.model.SessaoVotacao;
 import org.fhc.sicrvotacaoapi.model.VotoValor;
 import org.fhc.sicrvotacaoapi.repository.PautaRepository;
 import org.fhc.sicrvotacaoapi.repository.SessaoVotacaoRepository;
 import org.fhc.sicrvotacaoapi.repository.VotoRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ResultadoVotacaoService {
@@ -75,14 +75,24 @@ public class ResultadoVotacaoService {
     }
 
     private List<SessaoVotacao> buscarSessoesDaPauta(Long pautaId) {
+
         // Busca a pauta
         pautaRepository.findById(pautaId)
-                .orElseThrow(() -> new PautaNaoEncontradaException(pautaId));
+                .orElseThrow(() -> new BusinessException(
+                                            "Resultado não encontrado.",
+                                            HttpStatus.NOT_FOUND,
+                                            Map.of("pautaId", "Não há pauta com o ID " + pautaId)
+                ));
 
         List<SessaoVotacao> sessoes = sessaoRepository.findAllByPautaIdOrderByFimAsc(pautaId);
 
         if (sessoes.isEmpty()) {
-            throw new PautaSemSessoesException(pautaId);
+            //throw new PautaSemSessoesException(pautaId);
+            throw new BusinessException(
+                            "Resultado não encontrado.",
+                            HttpStatus.BAD_REQUEST,
+                            Map.of("pautaId", "Não há sessão para a pauta " + pautaId)
+            );
         }
 
         return sessoes;
@@ -92,26 +102,6 @@ public class ResultadoVotacaoService {
         return sessoes.stream().anyMatch(SessaoVotacao::isAberta);
     }
 
-    /*private ResultadoSessaoDTO calcularResultadoSessao(SessaoVotacao sessao) {
-
-        long totalSim = votoRepository.countBySessaoIdAndValor(sessao.getId(), VotoValor.SIM);
-        long totalNao = votoRepository.countBySessaoIdAndValor(sessao.getId(), VotoValor.NAO);
-
-        return ResultadoSessaoDTO.fromCounts(sessao.getId(), totalSim, totalNao);
-    }
-
-    private ResultadoVotacao calcularResultado(long totalSim, long totalNao) {
-
-        if (totalSim > totalNao) {
-            return ResultadoVotacao.SIM;
-        }
-
-        if (totalNao > totalSim) {
-            return ResultadoVotacao.NAO;
-        }
-
-        return ResultadoVotacao.EMPATE;
-    }*/
     private ResultadoVotacao calcularResultado(long totalSim, long totalNao) {
         if (totalSim > totalNao) return ResultadoVotacao.SIM;
         if (totalNao > totalSim) return ResultadoVotacao.NAO;

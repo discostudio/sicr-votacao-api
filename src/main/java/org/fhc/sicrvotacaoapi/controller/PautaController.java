@@ -2,10 +2,10 @@ package org.fhc.sicrvotacaoapi.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.fhc.sicrvotacaoapi.dto.PautaRequestDTO;
-import org.fhc.sicrvotacaoapi.dto.PautaResponseDTO;
-import org.fhc.sicrvotacaoapi.dto.ResultadoVotacaoConsolidadoDTO;
-import org.fhc.sicrvotacaoapi.dto.ResultadoVotacaoDTO;
+import org.fhc.sicrvotacaoapi.dto.pauta.PautaRequestDTO;
+import org.fhc.sicrvotacaoapi.dto.pauta.PautaResponseDTO;
+import org.fhc.sicrvotacaoapi.dto.resultado.ResultadoVotacaoConsolidadoDTO;
+import org.fhc.sicrvotacaoapi.dto.resultado.ResultadoVotacaoDTO;
 import org.fhc.sicrvotacaoapi.service.PautaService;
 import org.fhc.sicrvotacaoapi.service.ResultadoVotacaoService;
 import org.springframework.http.HttpStatus;

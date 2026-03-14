@@ -1,4 +1,4 @@
-package org.fhc.sicrvotacaoapi.dto;
+package org.fhc.sicrvotacaoapi.dto.pauta;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

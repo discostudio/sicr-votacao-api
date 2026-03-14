@@ -2,8 +2,8 @@ package org.fhc.sicrvotacaoapi.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.fhc.sicrvotacaoapi.dto.SessaoRequestDTO;
-import org.fhc.sicrvotacaoapi.dto.SessaoResponseDTO;
+import org.fhc.sicrvotacaoapi.dto.sessao.SessaoRequestDTO;
+import org.fhc.sicrvotacaoapi.dto.sessao.SessaoResponseDTO;
 import org.fhc.sicrvotacaoapi.service.SessaoVotacaoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

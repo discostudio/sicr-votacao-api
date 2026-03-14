@@ -2,17 +2,18 @@ package org.fhc.sicrvotacaoapi.service;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.fhc.sicrvotacaoapi.dto.SessaoRequestDTO;
-import org.fhc.sicrvotacaoapi.dto.SessaoResponseDTO;
-import org.fhc.sicrvotacaoapi.exception.PautaNaoEncontradaException;
-import org.fhc.sicrvotacaoapi.exception.SessaoJaAbertaException;
+import org.fhc.sicrvotacaoapi.dto.sessao.SessaoRequestDTO;
+import org.fhc.sicrvotacaoapi.dto.sessao.SessaoResponseDTO;
+import org.fhc.sicrvotacaoapi.exception.BusinessException;
 import org.fhc.sicrvotacaoapi.model.Pauta;
 import org.fhc.sicrvotacaoapi.model.SessaoVotacao;
 import org.fhc.sicrvotacaoapi.repository.PautaRepository;
 import org.fhc.sicrvotacaoapi.repository.SessaoVotacaoRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -32,14 +33,19 @@ public class SessaoVotacaoService {
 
         // Busca a pauta relacionada com a sessão a ser inserida
         Pauta pauta = pautaRepository.findById(dto.pautaId())
-                .orElseThrow(() -> new PautaNaoEncontradaException(dto.pautaId()));
+                .orElseThrow(() -> new BusinessException(
+                                            "Não foi possível criar a sessão.",
+                                            HttpStatus.NOT_FOUND,
+                                            Map.of("pautaId", "Pauta não encontrada com o ID " + dto.pautaId())
+                ));
 
-        //if (sessaoRepository.existsByPautaId(pauta.getId())) {
-        //    throw new SessaoJaAbertaException(pauta.getId());
-        //}
         // verifica se existe sessão aberta para a pauta
         if (sessaoRepository.existsByPautaIdAndFimAfter(pauta.getId(), LocalDateTime.now())) {
-            throw new SessaoJaAbertaException(pauta.getId());
+            throw new BusinessException(
+                    "Não foi possível criar a sessão.",
+                    HttpStatus.NOT_FOUND,
+                    Map.of("pautaId", "Já existe uma sessão aberta para a pauta com ID " + pauta.getId())
+            );
         }
 
         // define duração padrão de 1 minuto
