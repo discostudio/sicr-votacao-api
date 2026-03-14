@@ -10,5 +10,6 @@ public record ResultadoVotacaoConsolidadoDTO(
         long totalNao,
         long totalVotos,
         ResultadoVotacao resultado,          // SIM ou NAO consolidado
+        boolean possuiSessoesAbertas,
         List<ResultadoSessaoDTO> sessoes
 ) {}

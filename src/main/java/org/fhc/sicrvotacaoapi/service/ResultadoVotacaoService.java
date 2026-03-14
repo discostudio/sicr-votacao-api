@@ -41,14 +41,13 @@ public class ResultadoVotacaoService {
         long totalSim = resultadosPorSessao.stream().mapToLong(ResultadoSessaoDTO::totalSim).sum();
         long totalNao = resultadosPorSessao.stream().mapToLong(ResultadoSessaoDTO::totalNao).sum();
 
-        ResultadoVotacao resultado = calcularResultado(totalSim, totalNao);
-
         return new ResultadoVotacaoConsolidadoDTO(
                 pautaId,
                 totalSim,
                 totalNao,
                 totalSim + totalNao,
-                resultado,
+                calcularResultado(totalSim, totalNao),
+                possuiSessoesAbertas(sessoes),
                 resultadosPorSessao
         );
     }
@@ -64,9 +63,10 @@ public class ResultadoVotacaoService {
             totalNao += votoRepository.countBySessaoIdAndValor(sessao.getId(), VotoValor.NAO);
         }
 
-        ResultadoVotacao resultado = calcularResultado(totalSim, totalNao);
-
-        return new ResultadoVotacaoDTO(pautaId, resultado);
+        return new ResultadoVotacaoDTO(
+                pautaId,
+                calcularResultado(totalSim, totalNao),
+                possuiSessoesAbertas(sessoes));
 
     }
 
@@ -82,6 +82,10 @@ public class ResultadoVotacaoService {
         }
 
         return sessoes;
+    }
+
+    private boolean possuiSessoesAbertas(List<SessaoVotacao> sessoes) {
+        return sessoes.stream().anyMatch(SessaoVotacao::isAberta);
     }
 
     private ResultadoSessaoDTO calcularResultadoSessao(SessaoVotacao sessao) {
