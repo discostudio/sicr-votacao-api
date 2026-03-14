@@ -4,6 +4,7 @@ import org.fhc.sicrvotacaoapi.dto.ResultadoSessaoDTO;
 import org.fhc.sicrvotacaoapi.dto.ResultadoVotacaoConsolidadoDTO;
 import org.fhc.sicrvotacaoapi.dto.ResultadoVotacaoDTO;
 import org.fhc.sicrvotacaoapi.exception.PautaNaoEncontradaException;
+import org.fhc.sicrvotacaoapi.model.ResultadoVotacao;
 import org.fhc.sicrvotacaoapi.model.SessaoVotacao;
 import org.fhc.sicrvotacaoapi.model.VotoValor;
 import org.fhc.sicrvotacaoapi.repository.SessaoVotacaoRepository;
@@ -11,7 +12,6 @@ import org.fhc.sicrvotacaoapi.repository.VotoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ResultadoVotacaoService {
@@ -35,7 +35,7 @@ public class ResultadoVotacaoService {
         long totalSim = resultadosPorSessao.stream().mapToLong(ResultadoSessaoDTO::totalSim).sum();
         long totalNao = resultadosPorSessao.stream().mapToLong(ResultadoSessaoDTO::totalNao).sum();
 
-        String resultado = calcularResultado(totalSim, totalNao);
+        ResultadoVotacao resultado = calcularResultado(totalSim, totalNao);
 
         return new ResultadoVotacaoConsolidadoDTO(
                 pautaId,
@@ -58,7 +58,7 @@ public class ResultadoVotacaoService {
             totalNao += votoRepository.countBySessaoIdAndValor(sessao.getId(), VotoValor.NAO);
         }
 
-        String resultado = calcularResultado(totalSim, totalNao);
+        ResultadoVotacao resultado = calcularResultado(totalSim, totalNao);
 
         return new ResultadoVotacaoDTO(pautaId, resultado);
 
@@ -82,16 +82,16 @@ public class ResultadoVotacaoService {
         return ResultadoSessaoDTO.fromCounts(sessao.getId(), totalSim, totalNao);
     }
 
-    private String calcularResultado(long totalSim, long totalNao) {
+    private ResultadoVotacao calcularResultado(long totalSim, long totalNao) {
 
         if (totalSim > totalNao) {
-            return "SIM";
+            return ResultadoVotacao.SIM;
         }
 
         if (totalNao > totalSim) {
-            return "NAO";
+            return ResultadoVotacao.NAO;
         }
 
-        return "EMPATE";
+        return ResultadoVotacao.EMPATE;
     }
 }
