@@ -1,5 +1,7 @@
 package org.fhc.sicrvotacaoapi.dto;
 
+import org.fhc.sicrvotacaoapi.model.ResultadoVotacao;
+
 import java.util.List;
 
 public record ResultadoVotacaoConsolidadoDTO(
@@ -7,6 +9,6 @@ public record ResultadoVotacaoConsolidadoDTO(
         long totalSim,
         long totalNao,
         long totalVotos,
-        String resultado,          // SIM ou NAO consolidado
+        ResultadoVotacao resultado,          // SIM ou NAO consolidado
         List<ResultadoSessaoDTO> sessoes
 ) {}

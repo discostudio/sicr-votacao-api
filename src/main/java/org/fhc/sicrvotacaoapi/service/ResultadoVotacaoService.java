@@ -2,6 +2,7 @@ package org.fhc.sicrvotacaoapi.service;
 
 import org.fhc.sicrvotacaoapi.dto.ResultadoSessaoDTO;
 import org.fhc.sicrvotacaoapi.dto.ResultadoVotacaoConsolidadoDTO;
+import org.fhc.sicrvotacaoapi.dto.ResultadoVotacaoDTO;
 import org.fhc.sicrvotacaoapi.exception.PautaNaoEncontradaException;
 import org.fhc.sicrvotacaoapi.model.SessaoVotacao;
 import org.fhc.sicrvotacaoapi.model.VotoValor;
@@ -25,33 +26,72 @@ public class ResultadoVotacaoService {
     }
 
     public ResultadoVotacaoConsolidadoDTO obterResultadoConsolidado(Long pautaId) {
-        List<SessaoVotacao> sessoes = sessaoRepository.findAllByPautaIdOrderByFimAsc(pautaId);
+        List<SessaoVotacao> sessoes = buscarSessoesDaPauta(pautaId);
 
-        if (sessoes.isEmpty()) {
-            throw new PautaNaoEncontradaException(pautaId);
-        }
-
-        List<ResultadoSessaoDTO> resultadosPorSessao = sessoes.stream().map(sessao -> {
-            long totalSim = votoRepository.countBySessaoIdAndValor(sessao.getId(), VotoValor.SIM);
-            long totalNao = votoRepository.countBySessaoIdAndValor(sessao.getId(), VotoValor.NAO);
-            return ResultadoSessaoDTO.fromCounts(sessao.getId(), totalSim, totalNao);
-        }).collect(Collectors.toList());
+        List<ResultadoSessaoDTO> resultadosPorSessao = sessoes.stream()
+                .map(this::calcularResultadoSessao)
+                .toList();
 
         long totalSim = resultadosPorSessao.stream().mapToLong(ResultadoSessaoDTO::totalSim).sum();
         long totalNao = resultadosPorSessao.stream().mapToLong(ResultadoSessaoDTO::totalNao).sum();
 
-        String resultadoConsolidado;
-        if (totalSim > totalNao) resultadoConsolidado = "SIM";
-        else if (totalNao > totalSim) resultadoConsolidado = "NAO";
-        else resultadoConsolidado = "EMPATE";
+        String resultado = calcularResultado(totalSim, totalNao);
 
         return new ResultadoVotacaoConsolidadoDTO(
                 pautaId,
                 totalSim,
                 totalNao,
                 totalSim + totalNao,
-                resultadoConsolidado,
+                resultado,
                 resultadosPorSessao
         );
+    }
+
+    public ResultadoVotacaoDTO obterResultado(Long pautaId) {
+        List<SessaoVotacao> sessoes = buscarSessoesDaPauta(pautaId);
+
+        long totalSim = 0;
+        long totalNao = 0;
+
+        for (SessaoVotacao sessao : sessoes) {
+            totalSim += votoRepository.countBySessaoIdAndValor(sessao.getId(), VotoValor.SIM);
+            totalNao += votoRepository.countBySessaoIdAndValor(sessao.getId(), VotoValor.NAO);
+        }
+
+        String resultado = calcularResultado(totalSim, totalNao);
+
+        return new ResultadoVotacaoDTO(pautaId, resultado);
+
+    }
+
+    private List<SessaoVotacao> buscarSessoesDaPauta(Long pautaId) {
+        List<SessaoVotacao> sessoes = sessaoRepository.findAllByPautaIdOrderByFimAsc(pautaId);
+
+        if (sessoes.isEmpty()) {
+            throw new PautaNaoEncontradaException(pautaId);
+        }
+
+        return sessoes;
+    }
+
+    private ResultadoSessaoDTO calcularResultadoSessao(SessaoVotacao sessao) {
+
+        long totalSim = votoRepository.countBySessaoIdAndValor(sessao.getId(), VotoValor.SIM);
+        long totalNao = votoRepository.countBySessaoIdAndValor(sessao.getId(), VotoValor.NAO);
+
+        return ResultadoSessaoDTO.fromCounts(sessao.getId(), totalSim, totalNao);
+    }
+
+    private String calcularResultado(long totalSim, long totalNao) {
+
+        if (totalSim > totalNao) {
+            return "SIM";
+        }
+
+        if (totalNao > totalSim) {
+            return "NAO";
+        }
+
+        return "EMPATE";
     }
 }

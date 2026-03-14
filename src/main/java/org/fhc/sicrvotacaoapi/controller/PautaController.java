@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.fhc.sicrvotacaoapi.dto.PautaRequestDTO;
 import org.fhc.sicrvotacaoapi.dto.PautaResponseDTO;
 import org.fhc.sicrvotacaoapi.dto.ResultadoVotacaoConsolidadoDTO;
+import org.fhc.sicrvotacaoapi.dto.ResultadoVotacaoDTO;
 import org.fhc.sicrvotacaoapi.service.PautaService;
 import org.fhc.sicrvotacaoapi.service.ResultadoVotacaoService;
 import org.springframework.http.HttpStatus;
@@ -34,9 +35,15 @@ public class PautaController {
                 .body(pautaResponse);
     }
 
-    @GetMapping("/{pautaId}/resultado")
-    public ResponseEntity<ResultadoVotacaoConsolidadoDTO> obterResultado(@PathVariable Long pautaId) {
+    @GetMapping("/{pautaId}/resultadoConsolidado")
+    public ResponseEntity<ResultadoVotacaoConsolidadoDTO> obterResultadoConsolidado(@PathVariable Long pautaId) {
         ResultadoVotacaoConsolidadoDTO resultadoVotacao = resultadoService.obterResultadoConsolidado(pautaId);
+        return ResponseEntity.ok(resultadoVotacao);
+    }
+
+    @GetMapping("/{pautaId}/resultado")
+    public ResponseEntity<ResultadoVotacaoDTO> obterResultado(@PathVariable Long pautaId) {
+        ResultadoVotacaoDTO resultadoVotacao = resultadoService.obterResultado(pautaId);
         return ResponseEntity.ok(resultadoVotacao);
     }
 }
