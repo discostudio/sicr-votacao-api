@@ -10,6 +10,8 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +29,41 @@ public class GlobalExceptionHandler {
 
         ErrorResponseDTO error = new ErrorResponseDTO("Campos inválidos", fieldErrors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    // parâmetro inválido
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponseDTO> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        Map<String, String> fieldErrors = new HashMap<>();
+
+        // Usa o nome do parâmetro (ex: "id") e cria a mensagem amigável
+        String fieldName = ex.getName();
+        String requiredType = (ex.getRequiredType() != null) ? ex.getRequiredType().getSimpleName() : "definido";
+        String errorMessage = String.format("O valor '%s' é inválido. Esperava-se um tipo %s.", ex.getValue(), requiredType);
+
+        fieldErrors.put(fieldName, errorMessage);
+
+        ErrorResponseDTO error = new ErrorResponseDTO("Erro de validação de parâmetro", fieldErrors);
+
+        // Retornamos 400 (Bad Request) porque o erro foi no envio do dado pelo cliente
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    // Rota inválida
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponseDTO> handleNoResourceFound(NoResourceFoundException ex) {
+        Map<String, String> fieldErrors = new HashMap<>();
+
+        // Identifica qual recurso/rota o usuário tentou acessar
+        String resourcePath = ex.getResourcePath();
+
+        fieldErrors.put("url", "O recurso solicitado '" + resourcePath + "' não foi encontrado.");
+        fieldErrors.put("dica", "Verifique se você esqueceu de passar o ID ou parâmetro obrigatório na URL.");
+
+        ErrorResponseDTO error = new ErrorResponseDTO("Recurso não encontrado", fieldErrors);
+
+        // Para NoResourceFound, o status correto é 404 NOT_FOUND
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
     // Campos desconhecidos no JSON
