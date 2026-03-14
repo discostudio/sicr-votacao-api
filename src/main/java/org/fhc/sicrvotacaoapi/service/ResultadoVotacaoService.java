@@ -4,9 +4,12 @@ import org.fhc.sicrvotacaoapi.dto.ResultadoSessaoDTO;
 import org.fhc.sicrvotacaoapi.dto.ResultadoVotacaoConsolidadoDTO;
 import org.fhc.sicrvotacaoapi.dto.ResultadoVotacaoDTO;
 import org.fhc.sicrvotacaoapi.exception.PautaNaoEncontradaException;
+import org.fhc.sicrvotacaoapi.exception.PautaSemSessoesException;
+import org.fhc.sicrvotacaoapi.model.Pauta;
 import org.fhc.sicrvotacaoapi.model.ResultadoVotacao;
 import org.fhc.sicrvotacaoapi.model.SessaoVotacao;
 import org.fhc.sicrvotacaoapi.model.VotoValor;
+import org.fhc.sicrvotacaoapi.repository.PautaRepository;
 import org.fhc.sicrvotacaoapi.repository.SessaoVotacaoRepository;
 import org.fhc.sicrvotacaoapi.repository.VotoRepository;
 import org.springframework.stereotype.Service;
@@ -18,11 +21,14 @@ public class ResultadoVotacaoService {
 
     private final SessaoVotacaoRepository sessaoRepository;
     private final VotoRepository votoRepository;
+    private final PautaRepository pautaRepository;
 
     public ResultadoVotacaoService(SessaoVotacaoRepository sessaoRepository,
-                                   VotoRepository votoRepository) {
+                                   VotoRepository votoRepository,
+                                   PautaRepository pautaRepository) {
         this.sessaoRepository = sessaoRepository;
         this.votoRepository = votoRepository;
+        this.pautaRepository = pautaRepository;
     }
 
     public ResultadoVotacaoConsolidadoDTO obterResultadoConsolidado(Long pautaId) {
@@ -65,10 +71,14 @@ public class ResultadoVotacaoService {
     }
 
     private List<SessaoVotacao> buscarSessoesDaPauta(Long pautaId) {
+        // Busca a pauta
+        Pauta pauta = pautaRepository.findById(pautaId)
+                .orElseThrow(() -> new PautaNaoEncontradaException(pautaId));
+
         List<SessaoVotacao> sessoes = sessaoRepository.findAllByPautaIdOrderByFimAsc(pautaId);
 
         if (sessoes.isEmpty()) {
-            throw new PautaNaoEncontradaException(pautaId);
+            throw new PautaSemSessoesException(pautaId);
         }
 
         return sessoes;

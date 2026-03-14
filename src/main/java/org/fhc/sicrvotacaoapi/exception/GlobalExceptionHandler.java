@@ -3,6 +3,7 @@ package org.fhc.sicrvotacaoapi.exception;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import lombok.extern.slf4j.Slf4j;
 import org.fhc.sicrvotacaoapi.dto.ErrorResponseDTO;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -57,13 +58,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
-    // Tratamento de pauta não encontrada ao abrir a sessão
+    // Tratamento de pauta não encontrada
     @ExceptionHandler(PautaNaoEncontradaException.class)
     public ResponseEntity<ErrorResponseDTO> handlePautaNaoEncontrada(PautaNaoEncontradaException ex) {
         Map<String, String> fieldErrors = new HashMap<>();
         fieldErrors.put("pautaId", ex.getMessage());
 
-        ErrorResponseDTO error = new ErrorResponseDTO("Erro ao abrir sessão", fieldErrors);
+        ErrorResponseDTO error = new ErrorResponseDTO("Erro ao realizar operação.", fieldErrors);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
@@ -76,7 +77,14 @@ public class GlobalExceptionHandler {
 
     // Pauta sem sessões abertas
     @ExceptionHandler(PautaSemSessoesAbertasException.class)
-    public ResponseEntity<ErrorResponseDTO> handlePautaSemSessoes(PautaSemSessoesAbertasException ex) {
+    public ResponseEntity<ErrorResponseDTO> handlePautaSemSessoesAbertas(PautaSemSessoesAbertasException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponseDTO(ex.getMessage(), Map.of()));
+    }
+
+    // Pauta sem sessões
+    @ExceptionHandler(PautaSemSessoesException.class)
+    public ResponseEntity<ErrorResponseDTO> handlePautaSemSessoes(PautaSemSessoesException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponseDTO(ex.getMessage(), Map.of()));
     }
@@ -93,6 +101,20 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDTO> handleVotoInvalido(VotoInvalidoException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponseDTO(ex.getMessage(), Map.of()));
+    }
+
+    // Erro de integridade no banco - importante para casos de unique constraints (tabela Voto, por exemplo)
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponseDTO> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+
+        log.error("Erro de integridade no banco", ex);
+
+        ErrorResponseDTO error = new ErrorResponseDTO(
+                "Erro ao armazenar informação",
+                Map.of("erro", "Operação não pôde ser concluída devido a conflito de dados")
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
     // Erros genéricos
