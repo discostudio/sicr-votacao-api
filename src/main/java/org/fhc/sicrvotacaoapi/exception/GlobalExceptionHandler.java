@@ -47,9 +47,36 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
+    // Tratamento da Sessão já aberta
+    @ExceptionHandler(SessaoJaAbertaException.class)
+    public ResponseEntity<ErrorResponseDTO> handleSessaoJaAberta(SessaoJaAbertaException ex) {
+        Map<String, String> fieldErrors = new HashMap<>();
+        fieldErrors.put("pautaId", ex.getMessage());
+
+        ErrorResponseDTO error = new ErrorResponseDTO("Erro ao abrir sessão", fieldErrors);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    // Tratamento de pauta não encontrada ao abrir a sessão
+    @ExceptionHandler(PautaNaoEncontradaException.class)
+    public ResponseEntity<ErrorResponseDTO> handlePautaNaoEncontrada(PautaNaoEncontradaException ex) {
+        Map<String, String> fieldErrors = new HashMap<>();
+        fieldErrors.put("pautaId", ex.getMessage());
+
+        ErrorResponseDTO error = new ErrorResponseDTO("Erro ao abrir sessão", fieldErrors);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
     // Erros genéricos
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDTO> handleGeneric(Exception ex) {
+        ErrorResponseDTO error = new ErrorResponseDTO("Erro interno do servidor", null);
+        log.error(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorResponseDTO> handleGeneric(RuntimeException ex) {
         ErrorResponseDTO error = new ErrorResponseDTO("Erro interno do servidor", null);
         log.error(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);

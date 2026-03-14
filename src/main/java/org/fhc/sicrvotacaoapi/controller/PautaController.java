@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.fhc.sicrvotacaoapi.dto.PautaRequestDTO;
 import org.fhc.sicrvotacaoapi.dto.PautaResponseDTO;
-import org.fhc.sicrvotacaoapi.model.Pauta;
 import org.fhc.sicrvotacaoapi.service.PautaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
