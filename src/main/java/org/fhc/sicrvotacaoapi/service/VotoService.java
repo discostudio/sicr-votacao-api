@@ -4,9 +4,11 @@ import jakarta.transaction.Transactional;
 import org.fhc.sicrvotacaoapi.dto.VotoRequestDTO;
 import org.fhc.sicrvotacaoapi.dto.VotoResponseDTO;
 import org.fhc.sicrvotacaoapi.exception.*;
+import org.fhc.sicrvotacaoapi.model.Pauta;
 import org.fhc.sicrvotacaoapi.model.SessaoVotacao;
 import org.fhc.sicrvotacaoapi.model.Voto;
 import org.fhc.sicrvotacaoapi.model.VotoValor;
+import org.fhc.sicrvotacaoapi.repository.PautaRepository;
 import org.fhc.sicrvotacaoapi.repository.SessaoVotacaoRepository;
 import org.fhc.sicrvotacaoapi.repository.VotoRepository;
 import org.springframework.stereotype.Service;
@@ -18,23 +20,29 @@ public class VotoService {
 
     private final VotoRepository votoRepository;
     private final SessaoVotacaoRepository sessaoRepository;
+    private final PautaRepository  pautaRepository;
 
-    public VotoService(VotoRepository votoRepository, SessaoVotacaoRepository sessaoRepository) {
+    public VotoService(VotoRepository votoRepository, SessaoVotacaoRepository sessaoRepository, PautaRepository pautaRepository) {
         this.votoRepository = votoRepository;
         this.sessaoRepository = sessaoRepository;
+        this.pautaRepository = pautaRepository;
     }
 
     @Transactional
     public VotoResponseDTO registrarVoto(VotoRequestDTO votoRequest) {
 
+        // Busca a pauta
+        Pauta pauta = pautaRepository.findById(votoRequest.pautaId())
+                .orElseThrow(() -> new PautaNaoEncontradaException(votoRequest.pautaId()));
+
         // buscar sessão aberta da pauta
         SessaoVotacao sessaoAberta = sessaoRepository
-                .findByPautaIdAndFimAfter(votoRequest.pautaId(), LocalDateTime.now())
-                .orElseThrow(() -> new PautaSemSessoesAbertasException(votoRequest.pautaId()));
+                .findByPautaIdAndFimAfter(pauta.getId(), LocalDateTime.now())
+                .orElseThrow(() -> new PautaSemSessoesAbertasException(pauta.getId()));
 
         // Validar se associado já votou na pauta (na sessão atual ou em sessões anteriores)
-        if (votoRepository.existsBySessaoPautaIdAndAssociadoId(votoRequest.pautaId(), votoRequest.associadoId())) {
-            throw new AssociadoJaVotouException(votoRequest.pautaId(), votoRequest.associadoId());
+        if (votoRepository.existsBySessaoPautaIdAndAssociadoId(pauta.getId(), votoRequest.associadoId())) {
+            throw new AssociadoJaVotouException(pauta.getId(), votoRequest.associadoId());
         }
 
         VotoValor valor;
