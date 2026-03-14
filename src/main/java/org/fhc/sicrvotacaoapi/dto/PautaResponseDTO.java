@@ -1,5 +1,6 @@
 package org.fhc.sicrvotacaoapi.dto;
 
+import lombok.Getter;
 import org.fhc.sicrvotacaoapi.model.Pauta;
 
 public record PautaResponseDTO(Long id, String nome, String descricao) {

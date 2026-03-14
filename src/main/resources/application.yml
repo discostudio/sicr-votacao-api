@@ -6,6 +6,10 @@ spring:
     password: passvotacao123
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+
   jpa:
     hibernate:
       ddl-auto: update
