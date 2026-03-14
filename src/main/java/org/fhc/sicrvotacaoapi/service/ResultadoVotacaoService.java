@@ -35,7 +35,11 @@ public class ResultadoVotacaoService {
         List<SessaoVotacao> sessoes = buscarSessoesDaPauta(pautaId);
 
         List<ResultadoSessaoDTO> resultadosPorSessao = sessoes.stream()
-                .map(this::calcularResultadoSessao)
+                .map(sessao -> {
+                    long totalSim = votoRepository.countBySessaoIdAndValor(sessao.getId(), VotoValor.SIM);
+                    long totalNao = votoRepository.countBySessaoIdAndValor(sessao.getId(), VotoValor.NAO);
+                    return ResultadoSessaoDTO.fromSessao(sessao, totalSim, totalNao);
+                })
                 .toList();
 
         long totalSim = resultadosPorSessao.stream().mapToLong(ResultadoSessaoDTO::totalSim).sum();
@@ -72,7 +76,7 @@ public class ResultadoVotacaoService {
 
     private List<SessaoVotacao> buscarSessoesDaPauta(Long pautaId) {
         // Busca a pauta
-        Pauta pauta = pautaRepository.findById(pautaId)
+        pautaRepository.findById(pautaId)
                 .orElseThrow(() -> new PautaNaoEncontradaException(pautaId));
 
         List<SessaoVotacao> sessoes = sessaoRepository.findAllByPautaIdOrderByFimAsc(pautaId);
@@ -88,7 +92,7 @@ public class ResultadoVotacaoService {
         return sessoes.stream().anyMatch(SessaoVotacao::isAberta);
     }
 
-    private ResultadoSessaoDTO calcularResultadoSessao(SessaoVotacao sessao) {
+    /*private ResultadoSessaoDTO calcularResultadoSessao(SessaoVotacao sessao) {
 
         long totalSim = votoRepository.countBySessaoIdAndValor(sessao.getId(), VotoValor.SIM);
         long totalNao = votoRepository.countBySessaoIdAndValor(sessao.getId(), VotoValor.NAO);
@@ -106,6 +110,11 @@ public class ResultadoVotacaoService {
             return ResultadoVotacao.NAO;
         }
 
+        return ResultadoVotacao.EMPATE;
+    }*/
+    private ResultadoVotacao calcularResultado(long totalSim, long totalNao) {
+        if (totalSim > totalNao) return ResultadoVotacao.SIM;
+        if (totalNao > totalSim) return ResultadoVotacao.NAO;
         return ResultadoVotacao.EMPATE;
     }
 }
