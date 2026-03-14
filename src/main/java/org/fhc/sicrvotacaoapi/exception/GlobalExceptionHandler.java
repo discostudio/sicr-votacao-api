@@ -67,6 +67,34 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
+    // Sessão não encontrada
+    @ExceptionHandler(SessaoNaoEncontradaException.class)
+    public ResponseEntity<ErrorResponseDTO> handleSessaoNaoEncontrada(SessaoNaoEncontradaException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponseDTO(ex.getMessage(), Map.of()));
+    }
+
+    // Sessão fechada
+    @ExceptionHandler(SessaoFechadaException.class)
+    public ResponseEntity<ErrorResponseDTO> handleSessaoFechada(SessaoFechadaException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponseDTO(ex.getMessage(), Map.of()));
+    }
+
+    // Associado já votou
+    @ExceptionHandler(AssociadoJaVotouException.class)
+    public ResponseEntity<ErrorResponseDTO> handleAssociadoJaVotou(AssociadoJaVotouException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponseDTO(ex.getMessage(), Map.of()));
+    }
+
+    // Voto inválido
+    @ExceptionHandler(VotoInvalidoException.class)
+    public ResponseEntity<ErrorResponseDTO> handleVotoInvalido(VotoInvalidoException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponseDTO(ex.getMessage(), Map.of()));
+    }
+
     // Erros genéricos
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDTO> handleGeneric(Exception ex) {
