@@ -34,7 +34,11 @@ public class SessaoVotacaoService {
         Pauta pauta = pautaRepository.findById(dto.pautaId())
                 .orElseThrow(() -> new PautaNaoEncontradaException(dto.pautaId()));
 
-        if (sessaoRepository.existsByPautaId(pauta.getId())) {
+        //if (sessaoRepository.existsByPautaId(pauta.getId())) {
+        //    throw new SessaoJaAbertaException(pauta.getId());
+        //}
+        // verifica se existe sessão aberta para a pauta
+        if (sessaoRepository.existsByPautaIdAndFimAfter(pauta.getId(), LocalDateTime.now())) {
             throw new SessaoJaAbertaException(pauta.getId());
         }
 

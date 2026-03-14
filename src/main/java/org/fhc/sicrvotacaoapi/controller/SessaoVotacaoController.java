@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.fhc.sicrvotacaoapi.dto.SessaoRequestDTO;
 import org.fhc.sicrvotacaoapi.dto.SessaoResponseDTO;
 import org.fhc.sicrvotacaoapi.service.SessaoVotacaoService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,6 +28,6 @@ public class SessaoVotacaoController {
         log.info("POST /api/v1/sessoes chamado com pauta={}", sessaoRequest.pautaId());
 
         SessaoResponseDTO sessaoResponse = sessaoService.abrirSessao(sessaoRequest);
-        return ResponseEntity.status(201).body(sessaoResponse);
+        return ResponseEntity.status(HttpStatus.CREATED).body(sessaoResponse);
     }
 }

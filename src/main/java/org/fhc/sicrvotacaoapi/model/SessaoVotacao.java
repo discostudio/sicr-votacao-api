@@ -15,9 +15,9 @@ public class SessaoVotacao {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // uma sessão por pauta.
-    @OneToOne
-    @JoinColumn(name = "pauta_id", nullable = false, unique = true)
+    // permitir mais de uma sessão por pauta (desde que sessão anterior já esteja finalizada)
+    @ManyToOne
+    @JoinColumn(name = "pauta_id", nullable = false)
     private Pauta pauta;
 
     private LocalDateTime criadoEm;
