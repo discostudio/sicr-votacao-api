@@ -5,16 +5,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface SessaoVotacaoRepository extends JpaRepository<SessaoVotacao, Long> {
 
-    //boolean existsByPautaId(Long pautaId);
-    // Verifica se existe sessão ativa para uma pauta
+    // Verifica se existe sessão aberta para uma pauta
     boolean existsByPautaIdAndFimAfter(Long pautaId, LocalDateTime now);
 
-    //SessaoVotacao findByPautaId(Long pautaId);
-    // Recupera a última sessão da pauta
-    //SessaoVotacao findTopByPautaIdOrderByFimDesc(Long pautaId);
+    // Busca a sessão de votação aberta para uma pauta, caso exista
+    Optional<SessaoVotacao> findByPautaIdAndFimAfter(Long pautaId, LocalDateTime agora);
 
     // Recupera todas as sessões de uma pauta em ordem de fim (mais antiga → mais recente)
     List<SessaoVotacao> findAllByPautaIdOrderByFimAsc(Long pautaId);

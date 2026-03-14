@@ -74,9 +74,9 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponseDTO(ex.getMessage(), Map.of()));
     }
 
-    // Sessão fechada
-    @ExceptionHandler(SessaoFechadaException.class)
-    public ResponseEntity<ErrorResponseDTO> handleSessaoFechada(SessaoFechadaException ex) {
+    // Pauta sem sessões abertas
+    @ExceptionHandler(PautaSemSessoesAbertasException.class)
+    public ResponseEntity<ErrorResponseDTO> handlePautaSemSessoes(PautaSemSessoesAbertasException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponseDTO(ex.getMessage(), Map.of()));
     }

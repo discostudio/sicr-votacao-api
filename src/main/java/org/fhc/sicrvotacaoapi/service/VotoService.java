@@ -3,16 +3,15 @@ package org.fhc.sicrvotacaoapi.service;
 import jakarta.transaction.Transactional;
 import org.fhc.sicrvotacaoapi.dto.VotoRequestDTO;
 import org.fhc.sicrvotacaoapi.dto.VotoResponseDTO;
-import org.fhc.sicrvotacaoapi.exception.AssociadoJaVotouException;
-import org.fhc.sicrvotacaoapi.exception.SessaoFechadaException;
-import org.fhc.sicrvotacaoapi.exception.SessaoNaoEncontradaException;
-import org.fhc.sicrvotacaoapi.exception.VotoInvalidoException;
+import org.fhc.sicrvotacaoapi.exception.*;
 import org.fhc.sicrvotacaoapi.model.SessaoVotacao;
 import org.fhc.sicrvotacaoapi.model.Voto;
 import org.fhc.sicrvotacaoapi.model.VotoValor;
 import org.fhc.sicrvotacaoapi.repository.SessaoVotacaoRepository;
 import org.fhc.sicrvotacaoapi.repository.VotoRepository;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 public class VotoService {
@@ -27,17 +26,15 @@ public class VotoService {
 
     @Transactional
     public VotoResponseDTO registrarVoto(VotoRequestDTO votoRequest) {
-        SessaoVotacao sessao = sessaoRepository.findById(votoRequest.sessaoId())
-                .orElseThrow(() -> new SessaoNaoEncontradaException(votoRequest.sessaoId()));
 
-        // Validar se sessão está aberta para registrar o voto
-        if (!sessao.isAberta()) {
-            throw new SessaoFechadaException(sessao.getId());
-        }
+        // buscar sessão aberta da pauta
+        SessaoVotacao sessaoAberta = sessaoRepository
+                .findByPautaIdAndFimAfter(votoRequest.pautaId(), LocalDateTime.now())
+                .orElseThrow(() -> new PautaSemSessoesAbertasException(votoRequest.pautaId()));
 
         // Validar se associado já votou na pauta (na sessão atual ou em sessões anteriores)
-        if (votoRepository.existsBySessaoPautaIdAndAssociadoId(sessao.getPauta().getId(), votoRequest.associadoId())) {
-            throw new AssociadoJaVotouException(sessao.getPauta().getId(), votoRequest.associadoId());
+        if (votoRepository.existsBySessaoPautaIdAndAssociadoId(votoRequest.pautaId(), votoRequest.associadoId())) {
+            throw new AssociadoJaVotouException(votoRequest.pautaId(), votoRequest.associadoId());
         }
 
         VotoValor valor;
@@ -47,7 +44,7 @@ public class VotoService {
             throw new VotoInvalidoException(votoRequest.valor());
         }
 
-        Voto voto = new Voto(sessao, votoRequest.associadoId(), valor);
+        Voto voto = new Voto(sessaoAberta, votoRequest.associadoId(), valor);
         voto = votoRepository.save(voto);
 
         return VotoResponseDTO.fromEntity(voto);
