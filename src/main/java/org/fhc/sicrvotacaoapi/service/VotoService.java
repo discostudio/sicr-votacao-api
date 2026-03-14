@@ -30,12 +30,14 @@ public class VotoService {
         SessaoVotacao sessao = sessaoRepository.findById(votoRequest.sessaoId())
                 .orElseThrow(() -> new SessaoNaoEncontradaException(votoRequest.sessaoId()));
 
+        // Validar se sessão está aberta para registrar o voto
         if (!sessao.isAberta()) {
             throw new SessaoFechadaException(sessao.getId());
         }
 
-        if (votoRepository.existsBySessaoIdAndAssociadoId(sessao.getId(), votoRequest.associadoId())) {
-            throw new AssociadoJaVotouException(sessao.getId(), votoRequest.associadoId());
+        // Validar se associado já votou na pauta (na sessão atual ou em sessões anteriores)
+        if (votoRepository.existsBySessaoPautaIdAndAssociadoId(sessao.getPauta().getId(), votoRequest.associadoId())) {
+            throw new AssociadoJaVotouException(sessao.getPauta().getId(), votoRequest.associadoId());
         }
 
         VotoValor valor;
