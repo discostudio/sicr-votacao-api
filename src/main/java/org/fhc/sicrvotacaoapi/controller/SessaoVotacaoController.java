@@ -72,7 +72,7 @@ public class SessaoVotacaoController {
     })
     @PostMapping
     public ResponseEntity<SessaoResponseDTO> abrirSessao(@Valid @RequestBody SessaoRequestDTO sessaoRequest) {
-        log.info("POST /api/v1/sessoes chamado com pauta={}", sessaoRequest.pautaId());
+        log.info("SessaoController: POST /api/v1/sessoes. Pauta: {}.", sessaoRequest.pautaId());
 
         SessaoResponseDTO sessaoResponse = sessaoService.abrirSessao(sessaoRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(sessaoResponse);

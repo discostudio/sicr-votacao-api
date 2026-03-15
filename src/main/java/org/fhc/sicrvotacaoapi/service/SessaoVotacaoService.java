@@ -58,7 +58,7 @@ public class SessaoVotacaoService {
         SessaoVotacao sessao = new SessaoVotacao(pauta, inicio, fim);
         sessao = sessaoRepository.save(sessao);
 
-        log.info("Sessão salva com id={}", sessao.getId());
+        log.info("SessaoVotacaoService: Sessão salva com id={}", sessao.getId());
 
         return SessaoResponseDTO.fromEntity(sessao);
     }

@@ -27,6 +27,8 @@ public class GlobalExceptionHandler {
                 .forEach(err -> fieldErrors.put(err.getField(), err.getDefaultMessage()));
 
         ErrorResponseDTO error = new ErrorResponseDTO("Campos inválidos", fieldErrors);
+
+        log.error("Exceção MethodArgumentNotValidException: {}.", error.message());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
@@ -44,7 +46,7 @@ public class GlobalExceptionHandler {
 
         ErrorResponseDTO error = new ErrorResponseDTO("Erro de validação de parâmetro", fieldErrors);
 
-        // Retornamos 400 (Bad Request) porque o erro foi no envio do dado pelo cliente
+        log.error("Exceção MethodArgumentTypeMismatchException: {}.", error.message());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
@@ -61,7 +63,7 @@ public class GlobalExceptionHandler {
 
         ErrorResponseDTO error = new ErrorResponseDTO("Recurso não encontrado", fieldErrors);
 
-        // Para NoResourceFound, o status correto é 404 NOT_FOUND
+        log.error("Exceção NoResourceFoundException: {}.", error.message());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
@@ -81,17 +83,20 @@ public class GlobalExceptionHandler {
                 fieldErrors.isEmpty() ? null : fieldErrors
         );
 
+        log.error("Exceção HttpMessageNotReadableException: {}.", error.message());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
     // Mensagens de negócio
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponseDTO> handleBusiness(BusinessException ex) {
-        ErrorResponseDTO response = new ErrorResponseDTO(
+        ErrorResponseDTO error = new ErrorResponseDTO(
                 ex.getMessage(),
                 ex.getFieldErrors()
         );
-        return ResponseEntity.status(ex.getStatus()).body(response);
+
+        log.error("Exceção BusinessException: {}.", error.message());
+        return ResponseEntity.status(ex.getStatus()).body(error);
     }
 
     // Erro de integridade no banco - importante para casos de unique constraints (tabela Voto, por exemplo)
@@ -105,6 +110,7 @@ public class GlobalExceptionHandler {
                 Map.of("erro", "Operação não pôde ser concluída devido a conflito de dados")
         );
 
+        log.error("Exceção DataIntegrityViolationException: {}.", error.message());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
@@ -112,14 +118,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDTO> handleGeneric(Exception ex) {
         ErrorResponseDTO error = new ErrorResponseDTO("Erro interno do servidor", null);
-        log.error(ex.getMessage(), ex);
+
+        log.error("Exceção Exception: {}.", error.message());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponseDTO> handleGeneric(RuntimeException ex) {
         ErrorResponseDTO error = new ErrorResponseDTO("Erro interno do servidor", null);
-        log.error(ex.getMessage(), ex);
+
+        log.error("Exceção RuntimeException: {}.", error.message());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 }

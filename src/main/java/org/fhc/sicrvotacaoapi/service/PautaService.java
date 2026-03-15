@@ -20,7 +20,7 @@ public class PautaService {
         Pauta pauta = new Pauta(dto.nome(), dto.descricao());
 
         pauta = pautaRepository.save(pauta);
-        log.info("Pauta salva com id={}", pauta.getId());
+        log.info("PautaService: pauta salva com id={}", pauta.getId());
 
         return PautaResponseDTO.fromEntity(pauta);
     }

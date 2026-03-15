@@ -1,6 +1,7 @@
 package org.fhc.sicrvotacaoapi.service;
 
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.fhc.sicrvotacaoapi.dto.voto.VotoRequestDTO;
 import org.fhc.sicrvotacaoapi.dto.voto.VotoResponseDTO;
 import org.fhc.sicrvotacaoapi.exception.*;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class VotoService {
 
@@ -86,6 +88,8 @@ public class VotoService {
 
         Voto voto = new Voto(sessaoAberta, pauta, votoRequest.associadoCPF(), valor);
         voto = votoRepository.save(voto);
+
+        log.info("VotoService: voto salvo para a pauta {} e associado {}.", voto.getPauta().getId(), voto.getAssociadoCpf());
 
         return VotoResponseDTO.fromEntity(voto);
     }

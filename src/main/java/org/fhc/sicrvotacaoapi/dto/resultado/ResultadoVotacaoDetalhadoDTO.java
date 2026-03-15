@@ -5,8 +5,8 @@ import org.fhc.sicrvotacaoapi.model.ResultadoVotacao;
 
 import java.util.List;
 
-@Schema(description = "DTO para retorno do resultado consolidado da votação de uma pauta, incluindo detalhes")
-public record ResultadoVotacaoConsolidadoDTO(@Schema(description = "ID da pauta", example = "1")
+@Schema(description = "DTO para retorno do resultado detalhado da votação de uma pauta, incluindo info de votos e sessões")
+public record ResultadoVotacaoDetalhadoDTO(@Schema(description = "ID da pauta", example = "1")
                                              Long pautaId,
                                              @Schema(description = "Total de votos SIM na pauta", example = "1")
                                              long totalSim,

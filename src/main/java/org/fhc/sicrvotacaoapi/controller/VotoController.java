@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.fhc.sicrvotacaoapi.dto.error.ErrorResponseDTO;
 import org.fhc.sicrvotacaoapi.dto.voto.VotoRequestDTO;
 import org.fhc.sicrvotacaoapi.dto.voto.VotoResponseDTO;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
         name = "Votos",
         description = "Registro dos votos dos associados nas pautas, em sessões abertas"
 )
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/votos")
 public class VotoController {
@@ -84,6 +86,8 @@ public class VotoController {
     })
     @PostMapping
     public ResponseEntity<VotoResponseDTO> registrarVoto(@Valid @RequestBody VotoRequestDTO votoRequest) {
+        log.info("VotoController: POST /api/v1/voto. Pauta: {}, Associado: {}", votoRequest.pautaId(), votoRequest.associadoCPF());
+
         VotoResponseDTO votoResponse = votoService.registrarVoto(votoRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(votoResponse);
     }

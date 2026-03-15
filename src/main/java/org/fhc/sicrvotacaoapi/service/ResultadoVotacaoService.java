@@ -1,8 +1,9 @@
 package org.fhc.sicrvotacaoapi.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.fhc.sicrvotacaoapi.dto.resultado.ResultadoSessaoDTO;
-import org.fhc.sicrvotacaoapi.dto.resultado.ResultadoVotacaoConsolidadoDTO;
 import org.fhc.sicrvotacaoapi.dto.resultado.ResultadoVotacaoDTO;
+import org.fhc.sicrvotacaoapi.dto.resultado.ResultadoVotacaoDetalhadoDTO;
 import org.fhc.sicrvotacaoapi.exception.BusinessException;
 import org.fhc.sicrvotacaoapi.model.ResultadoVotacao;
 import org.fhc.sicrvotacaoapi.model.SessaoVotacao;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class ResultadoVotacaoService {
 
@@ -31,7 +33,7 @@ public class ResultadoVotacaoService {
         this.pautaRepository = pautaRepository;
     }
 
-    public ResultadoVotacaoConsolidadoDTO obterResultadoConsolidado(Long pautaId) {
+    public ResultadoVotacaoDetalhadoDTO obterResultadoDetalhado(Long pautaId) {
         List<SessaoVotacao> sessoes = buscarSessoesDaPauta(pautaId);
 
         List<ResultadoSessaoDTO> resultadosPorSessao = sessoes.stream()
@@ -45,7 +47,9 @@ public class ResultadoVotacaoService {
         long totalSim = resultadosPorSessao.stream().mapToLong(ResultadoSessaoDTO::totalSim).sum();
         long totalNao = resultadosPorSessao.stream().mapToLong(ResultadoSessaoDTO::totalNao).sum();
 
-        return new ResultadoVotacaoConsolidadoDTO(
+        log.info("ResultadoVotacaoService: retornando resultado detalhado da pauta", pautaId);
+
+        return new ResultadoVotacaoDetalhadoDTO(
                 pautaId,
                 totalSim,
                 totalNao,
@@ -67,11 +71,12 @@ public class ResultadoVotacaoService {
             totalNao += votoRepository.countBySessaoIdAndValor(sessao.getId(), VotoValor.NAO);
         }
 
+        log.info("ResultadoVotacaoService: retornando resultado da pauta", pautaId);
+
         return new ResultadoVotacaoDTO(
                 pautaId,
                 calcularResultado(totalSim, totalNao),
                 possuiSessoesAbertas(sessoes));
-
     }
 
     private List<SessaoVotacao> buscarSessoesDaPauta(Long pautaId) {
@@ -79,7 +84,7 @@ public class ResultadoVotacaoService {
         // Busca a pauta
         pautaRepository.findById(pautaId)
                 .orElseThrow(() -> new BusinessException(
-                                            "Resultado não encontrado.",
+                                            "Pauta não encontrada.",
                                             HttpStatus.NOT_FOUND,
                                             Map.of("pautaId", "Não há pauta com o ID " + pautaId)
                 ));
@@ -87,9 +92,8 @@ public class ResultadoVotacaoService {
         List<SessaoVotacao> sessoes = sessaoRepository.findAllByPautaIdOrderByFimAsc(pautaId);
 
         if (sessoes.isEmpty()) {
-            //throw new PautaSemSessoesException(pautaId);
             throw new BusinessException(
-                            "Resultado não encontrado.",
+                            "Sessão não encontrada.",
                             HttpStatus.BAD_REQUEST,
                             Map.of("pautaId", "Não há sessão para a pauta " + pautaId)
             );

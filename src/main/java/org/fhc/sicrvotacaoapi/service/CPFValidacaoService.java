@@ -38,7 +38,7 @@ public class CPFValidacaoService {
         try {
             return executarChamadaExterna(cpf);
         } catch (Exception e) {
-            // 2. Fallback: Se a API falhar (Timeout, 404 de infra/HTML, 500, etc)
+            // Fallback: Se a API falhar (Timeout, 404 de infra/HTML, 500, etc)
             // e a configuração permitir, usamos o Mock para não travar a votação
             if (cpfValidacaoConfig.isUseMockOnFailure()) {
                 return validarViaMock(cpf);
@@ -75,12 +75,9 @@ public class CPFValidacaoService {
                                 .orElse(false);
 
                         if (isHtml) {
-                            log.info("Validação de CPF: chamada externa - erro 404 com HTML.");
                             // Se for HTML, tratamos como erro técnico para cair no fallback de Mock
                             return Mono.error(new RuntimeException("API externa retornou HTML de erro (404 Infra)"));
                         }
-
-                        log.info("Validação de CPF: chamada externa - erro 404 CPF inválido.");
 
                         // Se for JSON, é um 404 de negócio (CPF não existe na base deles)
                         return Mono.error(new BusinessException(

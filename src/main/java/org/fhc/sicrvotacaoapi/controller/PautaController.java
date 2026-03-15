@@ -12,8 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.fhc.sicrvotacaoapi.dto.error.ErrorResponseDTO;
 import org.fhc.sicrvotacaoapi.dto.pauta.PautaRequestDTO;
 import org.fhc.sicrvotacaoapi.dto.pauta.PautaResponseDTO;
-import org.fhc.sicrvotacaoapi.dto.resultado.ResultadoVotacaoConsolidadoDTO;
 import org.fhc.sicrvotacaoapi.dto.resultado.ResultadoVotacaoDTO;
+import org.fhc.sicrvotacaoapi.dto.resultado.ResultadoVotacaoDetalhadoDTO;
 import org.fhc.sicrvotacaoapi.service.PautaService;
 import org.fhc.sicrvotacaoapi.service.ResultadoVotacaoService;
 import org.springframework.http.HttpStatus;
@@ -59,7 +59,7 @@ public class PautaController {
     })
     @PostMapping
     public ResponseEntity<PautaResponseDTO> criarPauta(@Valid @RequestBody PautaRequestDTO pautaRequest) {
-        log.info("POST /api/v1/pautas chamado com nome={}", pautaRequest.nome());
+        log.info("PautaController: POST /api/v1/pautas. Nome: {}.",pautaRequest.nome());
 
         PautaResponseDTO pautaResponse = pautaService.criarPauta(pautaRequest);
 
@@ -68,12 +68,12 @@ public class PautaController {
                 .body(pautaResponse);
     }
 
-    @Operation(summary = "Consulta o resultado consolidado de uma pauta",
-               description = "Retorna o resultado consolidado da votação de uma pauta específica, inclusive detalhando o resultado das sessões")
+    @Operation(summary = "Consulta o resultado detalhado de uma pauta",
+               description = "Retorna o resultado detalhado da votação de uma pauta específica, inclusive a contagem de votos e o resultado das sessões")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                          description = "Resultado retornado com sucesso",
-                         content = @Content(schema = @Schema(implementation = ResultadoVotacaoConsolidadoDTO.class))),
+                         content = @Content(schema = @Schema(implementation = ResultadoVotacaoDetalhadoDTO.class))),
             @ApiResponse(responseCode = "400",
                          description = "Requisição inválida",
                          content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
@@ -103,9 +103,11 @@ public class PautaController {
                                  )
                          ))
     })
-    @GetMapping("/{pautaId}/resultadoConsolidado")
-    public ResponseEntity<ResultadoVotacaoConsolidadoDTO> obterResultadoConsolidado(@PathVariable Long pautaId) {
-        ResultadoVotacaoConsolidadoDTO resultadoVotacao = resultadoService.obterResultadoConsolidado(pautaId);
+    @GetMapping("/{pautaId}/resultadoCDetalhado")
+    public ResponseEntity<ResultadoVotacaoDetalhadoDTO> obterResultadoDetalhado(@PathVariable Long pautaId) {
+        log.info("PautaController: GET /api/v1/pautas/{}/resultadoConsolidado.", pautaId);
+
+        ResultadoVotacaoDetalhadoDTO resultadoVotacao = resultadoService.obterResultadoDetalhado(pautaId);
         return ResponseEntity.ok(resultadoVotacao);
     }
 
@@ -114,7 +116,7 @@ public class PautaController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                          description = "Resultado retornado com sucesso",
-                         content = @Content(schema = @Schema(implementation = ResultadoVotacaoConsolidadoDTO.class))),
+                         content = @Content(schema = @Schema(implementation = ResultadoVotacaoDTO.class))),
             @ApiResponse(responseCode = "400",
                          description = "Requisição inválida",
                          content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class),
@@ -146,6 +148,8 @@ public class PautaController {
     })
     @GetMapping("/{pautaId}/resultado")
     public ResponseEntity<ResultadoVotacaoDTO> obterResultado(@PathVariable Long pautaId) {
+        log.info("PautaController: GET /api/v1/pautas/{}/resultado.", pautaId);
+
         ResultadoVotacaoDTO resultadoVotacao = resultadoService.obterResultado(pautaId);
         return ResponseEntity.ok(resultadoVotacao);
     }

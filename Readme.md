@@ -85,12 +85,19 @@ GET -> /api/v1/pautas/{id}/resultado ->	Obter resultado consolidado da pauta
 -> Contabiliza e retorna resultado  
 
 7 - Refactoring tratamento de exceções  
+-> Utilização de BusinessException ao invés de exceções customizadas para erros de negócio
 
 8 - Documentação da API (swagger)  
 
 9 - Estrutura README  
 
-10 - Tarefa bônus: integração verificação CPF 
+10 - Tarefa bônus: integração verificação CPF  
+-> URL e timeout via application.yml, e classe de configuração para WebClient  
+-> Feature toggles para chamada da API externa e fallback com mock  
+-> Chama a API externa  
+-> Diferencia erro 404 de negócio de erro 404 técnico, adequado ao comportamento da API externa  
+-> Fallback com mock em caso de erro na API  
+-> Permite ou não votar  
 
 ## Formato das Requisições/Respostas
 ### Criar Pauta
