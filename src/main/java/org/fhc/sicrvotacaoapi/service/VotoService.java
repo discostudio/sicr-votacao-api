@@ -74,19 +74,7 @@ public class VotoService {
             );
         }
 
-        // Valida parâmetro do voto - SIM ou NAO
-        VotoValor valor;
-        try {
-            valor = VotoValor.valueOf(votoRequest.valor().toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new BusinessException(
-                    "Não foi possível registrar o voto.",
-                    HttpStatus.BAD_REQUEST,
-                    Map.of("valor", "Valor do voto inválido: '" + votoRequest.valor() + "'. Use 'SIM' ou 'NAO'.")
-            );
-        }
-
-        Voto voto = new Voto(sessaoAberta, pauta, votoRequest.associadoCPF(), valor);
+        Voto voto = new Voto(sessaoAberta, pauta, votoRequest.associadoCPF(), votoRequest.valor());
         voto = votoRepository.save(voto);
 
         log.info("VotoService: voto salvo para a pauta {} e associado {}.", voto.getPauta().getId(), voto.getAssociadoCpf());

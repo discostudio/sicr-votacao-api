@@ -99,6 +99,10 @@ GET -> /api/v1/pautas/{id}/resultado ->	Obter resultado consolidado da pauta
 -> Fallback com mock em caso de erro na API  
 -> Permite ou não votar  
 
+11 - Revisão de logs básicos  
+
+12 - Testes unitários básicos  
+
 ## Formato das Requisições/Respostas
 ### Criar Pauta
 

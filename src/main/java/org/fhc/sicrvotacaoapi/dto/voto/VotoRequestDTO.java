@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import org.fhc.sicrvotacaoapi.model.VotoValor;
 
 @Schema(description = "DTO para o registro de um voto em uma pauta")
 public record VotoRequestDTO(@NotNull(message = "ID da pauta é obrigatório")
@@ -16,5 +17,5 @@ public record VotoRequestDTO(@NotNull(message = "ID da pauta é obrigatório")
                              String associadoCPF,
                              @Schema(description = "Valor do voto - SIM ou NAO", example = "SIM")
                              @NotNull(message = "Valor do voto é obrigatório")
-                             String valor  // depois vamos converter para Enum SIM/NAO
+                             VotoValor valor
 ) {}
