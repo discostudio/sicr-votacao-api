@@ -8,7 +8,12 @@ import java.util.Optional;
 
 public interface VotoRepository extends JpaRepository<Voto, Long> {
 
+    // Conta todos os votos de uma sessão
+    long countBySessaoId(Long sessaoId);
+
+    // Verifica se o associado já votou na pauta
     boolean existsBySessaoPautaIdAndAssociadoId(Long pautaId, Long associadoId);
 
+    // quantos votos de um tipo específico (“SIM” ou “NÃO”) foram registrados em uma sessão de votação
     long countBySessaoIdAndValor(Long sessaoId, VotoValor valor);
 }

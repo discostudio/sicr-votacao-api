@@ -95,6 +95,19 @@ public class ResultadoVotacaoService {
             );
         }
 
+        // Verifica se existem votos em alguma sessão
+        long totalVotos = sessoes.stream()
+                .mapToLong(sessao -> votoRepository.countBySessaoId(sessao.getId()))
+                .sum();
+
+        if (totalVotos == 0) {
+            throw new BusinessException(
+                    "Resultado não encontrado.",
+                    HttpStatus.NOT_FOUND,
+                    Map.of("pautaId", "Não há votos registrados para a pauta " + pautaId)
+            );
+        }
+
         return sessoes;
     }
 
