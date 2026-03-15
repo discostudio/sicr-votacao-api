@@ -88,7 +88,9 @@ GET -> /api/v1/pautas/{id}/resultado ->	Obter resultado consolidado da pauta
 
 8 - Documentação da API (swagger)  
 
-9 - Estrutura README
+9 - Estrutura README  
+
+10 - Tarefa bônus: integração verificação CPF 
 
 ## Formato das Requisições/Respostas
 ### Criar Pauta

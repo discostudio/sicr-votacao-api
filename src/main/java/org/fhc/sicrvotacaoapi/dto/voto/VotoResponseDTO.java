@@ -8,17 +8,16 @@ public record VotoResponseDTO(@Schema(description = "ID da pauta", example = "1"
                               Long pautaId,
                               @Schema(description = "ID da sessão de votação", example = "1")
                               Long sessaoId,
-                              @Schema(description = "ID do associado", example = "1")
-                              Long associadoId,
+                              @Schema(description = "CPF do associado", example = "11122233345")
+                              String associadoCpf,
                               @Schema(description = "Valor do voto - SIM ou NAO", example = "SIM")
                               String valor
 ) {
     public static VotoResponseDTO fromEntity(Voto voto) {
         return new VotoResponseDTO(
-                //voto.getId(),
                 voto.getSessao().getPauta().getId(),
                 voto.getSessao().getId(),
-                voto.getAssociadoId(),
+                voto.getAssociadoCpf(),
                 voto.getValor().name()
         );
     }

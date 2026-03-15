@@ -12,7 +12,7 @@ public interface VotoRepository extends JpaRepository<Voto, Long> {
     long countBySessaoId(Long sessaoId);
 
     // Verifica se o associado já votou na pauta
-    boolean existsBySessaoPautaIdAndAssociadoId(Long pautaId, Long associadoId);
+    boolean existsBySessaoPautaIdAndAssociadoCpf(Long pautaId, String associadoCpf);
 
     // quantos votos de um tipo específico (“SIM” ou “NÃO”) foram registrados em uma sessão de votação
     long countBySessaoIdAndValor(Long sessaoId, VotoValor valor);

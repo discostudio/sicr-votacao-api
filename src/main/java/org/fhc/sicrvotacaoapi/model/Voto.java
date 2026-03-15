@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(
-        uniqueConstraints = @UniqueConstraint(columnNames = {"pauta_id", "associado_id"})
+        uniqueConstraints = @UniqueConstraint(columnNames = {"pauta_id", "associado_cpf"})
 )
 @Getter
 @NoArgsConstructor
@@ -27,8 +27,8 @@ public class Voto {
     @JoinColumn(name = "pauta_id", nullable = false)
     private Pauta pauta;
 
-    @Column(name = "associado_id", nullable = false)
-    private Long associadoId;
+    @Column(name = "associado_cpf", nullable = false, length = 11)
+    private String associadoCpf;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -36,10 +36,10 @@ public class Voto {
 
     private LocalDateTime criadoEm;
 
-    public Voto(SessaoVotacao sessao, Pauta pauta, Long associadoId, VotoValor valor) {
+    public Voto(SessaoVotacao sessao, Pauta pauta, String associadoCpf, VotoValor valor) {
         this.sessao = sessao;
         this.pauta = pauta;
-        this.associadoId = associadoId;
+        this.associadoCpf = associadoCpf;
         this.valor = valor;
         this.criadoEm = LocalDateTime.now();
     }
