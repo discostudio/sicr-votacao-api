@@ -63,12 +63,19 @@ public class ResultadoVotacaoService {
     public ResultadoVotacaoDTO obterResultado(Long pautaId) {
         List<SessaoVotacao> sessoes = buscarSessoesDaPauta(pautaId);
 
+        // PERFORMANCE: Busca os totais SIM/NAO agrupados em uma ÚNICA query ao banco.
+        List<Object[]> resultadosBrutos = votoRepository.countVotosGroupByValor(pautaId);
+
         long totalSim = 0;
         long totalNao = 0;
 
-        for (SessaoVotacao sessao : sessoes) {
-            totalSim += votoRepository.countBySessaoIdAndValor(sessao.getId(), VotoValor.SIM);
-            totalNao += votoRepository.countBySessaoIdAndValor(sessao.getId(), VotoValor.NAO);
+        // Processa o resultado da query agrupada
+        for (Object[] linha : resultadosBrutos) {
+            VotoValor valor = (VotoValor) linha[0];
+            long count = (long) linha[1];
+
+            if (VotoValor.SIM.equals(valor)) totalSim = count;
+            else if (VotoValor.NAO.equals(valor)) totalNao = count;
         }
 
         log.info("ResultadoVotacaoService: retornando resultado da pauta", pautaId);
@@ -124,4 +131,13 @@ public class ResultadoVotacaoService {
         if (totalNao > totalSim) return ResultadoVotacao.NAO;
         return ResultadoVotacao.EMPATE;
     }
+
+    /*private void validarPautaExiste(Long pautaId) {
+        pautaRepository.findById(pautaId)
+                .orElseThrow(() -> new BusinessException(
+                        "Pauta não encontrada.",
+                        HttpStatus.NOT_FOUND,
+                        Map.of("pautaId", "Não há pauta com o ID " + pautaId)
+                ));
+    }*/
 }

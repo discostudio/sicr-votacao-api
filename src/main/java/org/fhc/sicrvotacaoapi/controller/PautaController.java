@@ -103,7 +103,7 @@ public class PautaController {
                                  )
                          ))
     })
-    @GetMapping("/{pautaId}/resultadoCDetalhado")
+    @GetMapping("/{pautaId}/resultadoDetalhado")
     public ResponseEntity<ResultadoVotacaoDetalhadoDTO> obterResultadoDetalhado(@PathVariable Long pautaId) {
         log.info("PautaController: GET /api/v1/pautas/{}/resultadoConsolidado.", pautaId);
 

@@ -8,7 +8,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(
-        uniqueConstraints = @UniqueConstraint(columnNames = {"pauta_id", "associado_cpf"})
+    uniqueConstraints = @UniqueConstraint(columnNames = {"pauta_id", "associado_cpf"}),
+    indexes = { @Index(name = "idx_sessao_valor", columnList = "sessao_id, valor") }
 )
 @Getter
 @NoArgsConstructor
