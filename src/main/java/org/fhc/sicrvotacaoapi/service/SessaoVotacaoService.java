@@ -34,7 +34,7 @@ public class SessaoVotacaoService {
         // Busca a pauta relacionada com a sessão a ser inserida
         Pauta pauta = pautaRepository.findById(dto.pautaId())
                 .orElseThrow(() -> new BusinessException(
-                                            "Não foi possível criar a sessão.",
+                                            "Não foi possível criar a sessão",
                                             HttpStatus.NOT_FOUND,
                                             Map.of("pautaId", "Pauta não encontrada com o ID " + dto.pautaId())
                 ));
