@@ -71,7 +71,7 @@ public class VotoService {
             );
         }
 
-        Voto voto = new Voto(sessaoAberta, votoRequest.associadoId(), valor);
+        Voto voto = new Voto(sessaoAberta, pauta, votoRequest.associadoId(), valor);
         voto = votoRepository.save(voto);
 
         return VotoResponseDTO.fromEntity(voto);
