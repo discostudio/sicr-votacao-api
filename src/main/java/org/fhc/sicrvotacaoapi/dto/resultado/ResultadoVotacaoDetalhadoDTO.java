@@ -33,5 +33,10 @@ public record ResultadoVotacaoDetalhadoDTO(@Schema(description = "ID da pauta", 
                                                         ]
                                                     """
                                              )
-                                             List<ResultadoSessaoDTO> sessoes
+                                             List<ResultadoSessaoDTO> sessoes,
+                                           @Schema(description = "Número da página retornada", example = "0")
+                                           int page,
+
+                                           @Schema(description = "Tamanho da página", example = "10")
+                                           int size
 ) {}

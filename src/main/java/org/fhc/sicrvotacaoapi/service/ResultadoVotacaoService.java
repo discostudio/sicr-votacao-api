@@ -74,7 +74,9 @@ public class ResultadoVotacaoService {
                 totaisGerais.soma(),
                 calcularResultado(totaisGerais.totalSim(), totaisGerais.totalNao()),
                 possuiSessoesAbertas(pautaId),
-                resultadosPorSessao
+                resultadosPorSessao,
+                pageable.getPageNumber(),  // número da página atual
+                pageable.getPageSize()     // tamanho da página
         );
     }
 
