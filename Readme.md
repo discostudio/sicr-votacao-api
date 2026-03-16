@@ -257,3 +257,6 @@ Configurações de URLs e porta podem ser ajustadas via application.yml.
 Segurança das APIs foi abstraída para fins de teste.  
 Todos os endpoints usam JSON para entrada e saída.  
 A aplicação pode ser testada com Postman ou qualquer cliente HTTP.  
+
+---
+Desenvolvido por Fernando Cardoso.
