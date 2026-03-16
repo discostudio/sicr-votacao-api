@@ -39,7 +39,7 @@ POST ->	/api/v1/sessoes ->	Abrir sessão de votação
 POST -> /api/v1/votos -> Registrar voto de associado  
 GET -> /api/v1/pautas/{id}/resultado ->	Obter resultado consolidado da pauta  
 
-## ==> ESCOLHAS
+## ==> DECISÕES TÉCNICAS  
 
 - Estruras das pastas  
   Organizei o projeto em controller, service, repository, model e dtos para seguir o princípio de separação de responsabilidades.
@@ -53,6 +53,10 @@ GET -> /api/v1/pautas/{id}/resultado ->	Obter resultado consolidado da pauta
   Escolhi banco relacional (MySQL) porque atende aos requisitos "centenas de milhares de votos" e "pautas e os votos sejam persistidos e que não sejam perdidos com o restart da aplicação".
   Além disso, os dados da aplicação são estruturados e têm relacionamentos claros (Pauta, Sessao, Voto).
   Também precisamos garantir consistência e integridade com transações ACID, e realizar consultas agregadas de forma eficiente, inclusive facilitando os uso de JPA/Hibernate.
+
+- Performance  
+  Optei por otimizar o código e o banco através de avaliação de cenários n+1, priorizando queries customizadas em detrimento à queries padrão do Spring Data, nos repositories de Voto e Resultado, buscando maior controle e reduzir carga no banco.
+  Também criei índices no banco pensando nas consultas realizadas.
 
 ## ==> JOURNAL (passo a passo da implementação):
 
@@ -102,6 +106,30 @@ GET -> /api/v1/pautas/{id}/resultado ->	Obter resultado consolidado da pauta
 11 - Revisão de logs básicos  
 
 12 - Testes unitários básicos  
+
+13 - Tarefa bônus: performance  
+-> Índices nas tabelas  
+-> queries customizadas no JPA
+
+## Arquitetura e Escalabilidade
+
+A implementação atual foi projetada para manter simplicidade e clareza, atendendo aos requisitos funcionais com processamento síncrono das operações de voto e apuração.
+
+No entanto, em cenários com maior volume de requisições ou necessidade de maior escalabilidade, algumas evoluções arquiteturais podem ser consideradas.
+
+### Processamento Assíncrono de Votos
+
+Uma possível evolução seria a introdução de um event broker (por exemplo Kafka ou RabbitMQ) para desacoplar o recebimento dos votos do seu processamento. Nesse modelo, o registro de um voto publicaria um evento que poderia ser consumido posteriormente por serviços responsáveis pelo processamento.
+
+Essa abordagem permite redução do acoplamento entre componentes, maior escalabilidade horizontal e melhor absorção de picos de carga.
+
+### Consolidação de Resultados com Workers
+
+Outra evolução possível seria a introdução de workers responsáveis por processar sessões de votação encerradas, que poderiam consolidar os votos de uma sessão e persistir o resultado agregado, simplificando e otimizando a consulta de resultados finais.
+
+Dessa forma, evita-se a necessidade de computar resultados em tempo real sempre que uma consulta for realizada, reduzindo a carga sobre o banco de dados e melhorando a eficiência da aplicação.
+
+Essas estratégias se tornam especialmente relevantes em sistemas com alto volume de eventos ou com múltiplas sessões de votação ocorrendo simultaneamente.
 
 ## Formato das Requisições/Respostas
 ### Criar Pauta
@@ -197,12 +225,9 @@ Exceções retornam JSON no formato:
 }  
 }  
 
-## Observações
+## Observações   
 
 Configurações de URLs e porta podem ser ajustadas via application.yml.  
-
 Segurança das APIs foi abstraída para fins de teste.  
-
 Todos os endpoints usam JSON para entrada e saída.  
-
 A aplicação pode ser testada com Postman ou qualquer cliente HTTP.  
