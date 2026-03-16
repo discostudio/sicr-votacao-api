@@ -13,31 +13,117 @@ Lombok
 Maven  
 
 ## Estrutura do Projeto
-src/main/java  
+src/main/java/org.fhc.sicrvotacaoapi 
 ├── controller       -> Controllers REST  
 ├── service          -> Lógica de negócio  
 ├── repository       -> Repositórios JPA  
 ├── model            -> Entidades JPA  
-└── dto              -> Data Transfer Objects  
+├── dto              -> Data Transfer Objects  
+├── configuration    -> Beans de configuração (Swagger e WebClient)  
+└── exception        -> Customização de exceções  
+src/test/java/org.fhc.sicrvotacaoapi  
+├── controller       -> Testes unitários básicos para os controllers REST  
+└── service          -> Testes unitários básicos para as services (lógica de negócio)
 
-## Como rodar
+## 🚀 Como Executar o Projeto - via **Docker**
 
-Inicie o banco MySQL via Docker:  
-docker-compose up -d
-
-application.yml já está configurado para conexão no banco conforme docker compose.
-
-## Build e run:
-
-mvn clean install
-mvn spring-boot:run
+1. Necessário: **Docker** instalado.
+2. Clone o repositório e acesse a pasta raiz.
+3. Utilize o comando `docker-compose up --build` para subir a aplicação **java** e o banco **MySQL**.
+4. Os testes podem ser executados nos endpoints via **Postman**.
 
 ## Endpoints Principais
-Método	URL	Descrição  
-POST ->	/api/v1/pautas -> Criar nova pauta  
-POST ->	/api/v1/sessoes ->	Abrir sessão de votação  
-POST -> /api/v1/votos -> Registrar voto de associado  
-GET -> /api/v1/pautas/{id}/resultado ->	Obter resultado consolidado da pauta  
+Método ->	URL -> Descrição  
+POST ->	http://localhost:8080/api/v1/pautas -> Criar nova pauta  
+POST ->	http://localhost:8080/api/v1/sessoes ->	Abrir sessão de votação  
+POST -> http://localhost:8080/api/v1/votos -> Registrar voto de associado  
+GET -> http://localhost:8080/api/v1/pautas/{id}/resultado ->	Obter resultado básico da pauta  
+GET -> http://localhost:8080/api/v1/pautas/{id}/resultadoDetalhado ->	Obter resultado datalhado da pauta
+
+## Formato das Requisições/Respostas
+### Criar Pauta
+
+Request  
+{  
+"nome": "Aprovação do orçamento",  
+"descricao": "Votação do orçamento anual"  
+}
+
+Response
+{  
+"id": 1,  
+"nome": "Aprovação do orçamento",  
+"descricao": "Votação do orçamento anual"
+}
+
+### Abrir Sessão
+
+Request  
+{  
+"pautaId": 1,  
+"duracaoEmMinutos": 5  
+}
+
+Response  
+{  
+"id": 1,  
+"pautaId": 1,  
+"inicio": "2026-03-14T10:01:00",  
+"fim": "2026-03-14T10:06:00"
+}
+
+### Registrar Voto
+
+Request  
+{  
+"pautaId": 1,  
+"associadoCPF": "12345678912",  
+"valor": "SIM"  
+}
+
+Response  
+{  
+"id": 1,  
+"sessaoId": 1,  
+"associadoCPF": "12345678912",  
+"valor": "SIM"
+}
+
+### Resultado da Pauta  
+
+Response  
+{  
+"pautaId": 1,  
+"resultado": "SIM",  
+"possuiSessoesAbertas": true  
+}  
+
+### Resultado Detalhado da Pauta
+
+Response  
+{  
+"pautaId": 1,  
+"totalSim": 5,  
+"totalNao": 3,  
+"totalVotos": 8,  
+"resultado": "SIM",  
+"sessoesAbertas": false,  
+"resultadosPorSessao": [  
+{  
+"sessaoId": 1,  
+"totalSim": 3,  
+"totalNao": 2,  
+"resultado": "SIM",  
+"aberta": false  
+},  
+{  
+"sessaoId": 2,  
+"totalSim": 2,  
+"totalNao": 1,  
+"resultado": "SIM",  
+"aberta": false  
+}  
+]}
 
 ## ==> DECISÕES TÉCNICAS  
 
@@ -126,7 +212,9 @@ Maior cobertura de testes unitários.
 
 Análise estática de código (com SonarQube, por exemplo).
 
-Testes de performance (com JMeter, por exemplo), quantificando a necessidade de ajustes de arquitetura e escalabilidade citados no próximo item. 
+Testes de performance (com JMeter, por exemplo), quantificando a necessidade de ajustes de arquitetura e escalabilidade citados no próximo item.  
+
+Implementação de segurança (token, https).
 
 ## Arquitetura e Escalabilidade
 
@@ -147,85 +235,6 @@ Outra evolução possível seria a introdução de workers responsáveis por pro
 Dessa forma, evita-se a necessidade de computar resultados em tempo real sempre que uma consulta for realizada, reduzindo a carga sobre o banco de dados e melhorando a eficiência da aplicação.
 
 Essas estratégias se tornam especialmente relevantes em sistemas com alto volume de eventos ou com múltiplas sessões de votação ocorrendo simultaneamente.
-
-## Formato das Requisições/Respostas
-### Criar Pauta
-
-Request  
-{  
-"nome": "Aprovação do orçamento",  
-"descricao": "Votação do orçamento anual"  
-}
-
-Response
-{  
-"id": 1,  
-"nome": "Aprovação do orçamento",  
-"descricao": "Votação do orçamento anual",  
-"criadoEm": "2026-03-14T10:00:00"  
-}  
-
-### Abrir Sessão
-
-Request  
-{  
-"pautaId": 1,  
-"duracaoEmMinutos": 5  
-}  
-
-Response  
-{  
-"id": 1,  
-"pautaId": 1,  
-"inicio": "2026-03-14T10:01:00",  
-"fim": "2026-03-14T10:06:00",  
-"aberta": true  
-}  
-
-### Registrar Voto
-
-Request  
-{  
-"pautaId": 1,  
-"associadoId": 123,  
-"valor": "SIM"  
-}  
-
-Response  
-{  
-"id": 1,  
-"sessaoId": 1,  
-"associadoId": 123,  
-"valor": "SIM",  
-"criadoEm": "2026-03-14T10:02:00"  
-}  
-
-### Resultado Consolidado da Pauta
-
-Response  
-{  
-"pautaId": 1,  
-"totalSim": 5,  
-"totalNao": 3,  
-"totalVotos": 8,  
-"resultado": "SIM",  
-"sessoesAbertas": false,  
-"resultadosPorSessao": [  
-{  
-"sessaoId": 1,  
-"totalSim": 3,  
-"totalNao": 2,  
-"resultado": "SIM",  
-"aberta": false  
-},  
-{  
-"sessaoId": 2,  
-"totalSim": 2,  
-"totalNao": 1,  
-"resultado": "SIM",  
-"aberta": false  
-}  
-]}  
 
 ## Validações / Exceções
 

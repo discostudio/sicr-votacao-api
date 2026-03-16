@@ -20,5 +20,21 @@ services:
       timeout: 2s
       retries: 10
 
+  app-votacao:
+    build: .
+    container_name: sicr-app
+    restart: on-failure
+    depends_on:
+      mysql-db:
+        condition: service_healthy # Só sobe a app quando o banco estiver pronto
+    ports:
+      - "8080:8080"
+    environment:
+      # Sobrescreve as propriedades do application.properties
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/votacao_db?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=uservotacao
+      - SPRING_DATASOURCE_PASSWORD=passvotacao123
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+
 volumes:
   mysql_data:
