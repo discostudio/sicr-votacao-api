@@ -211,33 +211,30 @@ Response
 
 ## Melhorias futuras  
 
-Maior cobertura de testes unitários.
-
-Análise estática de código (com SonarQube, por exemplo).
-
+Maior cobertura de testes unitários.  
+Análise estática de código (com SonarQube, por exemplo).  
 Testes de performance (com JMeter, por exemplo), quantificando a necessidade de ajustes de arquitetura e escalabilidade citados no próximo item.  
+Observabilidade e monitoramento: métricas padrão via actuator, métricas customizadas, logs com correlation ID. Através do uso de ferramentas como Prometheus, Grafana e Opentelemetry.  
 
-Implementação de segurança (token, https).
-
-## Arquitetura e Escalabilidade
+## Arquitetura e Escalabilidade  
 
 A implementação atual foi projetada para manter simplicidade e clareza, atendendo aos requisitos funcionais com processamento síncrono das operações de voto e apuração.
 
 No entanto, em cenários com maior volume de requisições ou necessidade de maior escalabilidade, algumas evoluções arquiteturais podem ser consideradas.
 
-### Processamento Assíncrono de Votos
+### Processamento Assíncrono de Votos  
 
-Uma possível evolução seria a introdução de um event broker (por exemplo Kafka ou RabbitMQ) para desacoplar o recebimento dos votos do seu processamento. Nesse modelo, o registro de um voto publicaria um evento que poderia ser consumido posteriormente por serviços responsáveis pelo processamento.
+Uma possível evolução seria a introdução de um event broker (por exemplo Kafka ou RabbitMQ) para desacoplar o recebimento dos votos do seu processamento. Nesse modelo, o registro de um voto publicaria um evento que poderia ser consumido posteriormente por serviços responsáveis pelo processamento.  
 
-Essa abordagem permite redução do acoplamento entre componentes, maior escalabilidade horizontal e melhor absorção de picos de carga.
+Essa abordagem permite redução do acoplamento entre componentes, maior escalabilidade horizontal e melhor absorção de picos de carga, tendo como trade-off principais a necessidade de lidar com a consistência eventual, uma vez que o resultado não é atualizado instantaneamente, e o aumento da complexidade operacional para garantir a confiabilidade das mensagens através de ack, DLQ, idempotência, monitoramento de lag.
 
-### Consolidação de Resultados com Workers
+### Consolidação de Resultados com Workers  
 
 Outra evolução possível seria a introdução de workers responsáveis por processar sessões de votação encerradas, que poderiam consolidar os votos de uma sessão e persistir o resultado agregado, simplificando e otimizando a consulta de resultados finais.
 
 Dessa forma, evita-se a necessidade de computar resultados em tempo real sempre que uma consulta for realizada, reduzindo a carga sobre o banco de dados e melhorando a eficiência da aplicação.
 
-Essas estratégias se tornam especialmente relevantes em sistemas com alto volume de eventos ou com múltiplas sessões de votação ocorrendo simultaneamente.
+Essas estratégias se tornam especialmente relevantes em sistemas com alto volume de eventos ou com múltiplas sessões de votação ocorrendo simultaneamente, tendo como trade-off mais significativo a consistência eventual.
 
 ## Validações / Exceções
 
