@@ -42,7 +42,7 @@ public class SessaoVotacaoServiceTest {
         Pauta pauta = TestEntityFactory.criarPauta(pautaId, "Pauta Teste");
 
         when(pautaRepository.findById(pautaId)).thenReturn(Optional.of(pauta));
-        when(sessaoRepository.existsByPautaIdAndFimAfter(eq(pautaId), any(LocalDateTime.class))).thenReturn(false);
+        when(sessaoRepository.existsSessaoAberta(eq(pautaId), any(LocalDateTime.class))).thenReturn(false);
 
         // Simular o retorno com ID 100
         when(sessaoRepository.save(any(SessaoVotacao.class))).thenAnswer(invocation -> {
@@ -86,7 +86,7 @@ public class SessaoVotacaoServiceTest {
         Pauta pauta = TestEntityFactory.criarPauta(pautaId, "Pauta Existente");
 
         when(pautaRepository.findById(pautaId)).thenReturn(Optional.of(pauta));
-        when(sessaoRepository.existsByPautaIdAndFimAfter(eq(pautaId), any(LocalDateTime.class))).thenReturn(true);
+        when(sessaoRepository.existsSessaoAberta(eq(pautaId), any(LocalDateTime.class))).thenReturn(true);
 
         // WHEN
         BusinessException ex = assertThrows(BusinessException.class, () -> sessaoService.abrirSessao(request));

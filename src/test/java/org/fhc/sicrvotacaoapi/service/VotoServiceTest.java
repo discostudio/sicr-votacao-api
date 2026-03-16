@@ -47,10 +47,10 @@ public class VotoServiceTest {
         SessaoVotacao sessao = TestEntityFactory.criarSessao(pauta, 1);
 
         when(pautaRepository.findById(1L)).thenReturn(Optional.of(pauta));
-        when(sessaoRepository.findByPautaIdAndFimAfter(eq(1L), any())).thenReturn(Optional.of(sessao));
-        when(cpfValidacaoService.podeVotar(anyString())).thenReturn(true);
+        when(sessaoRepository.findByPautaIdAndFimAfter(eq(1L), any(LocalDateTime.class)))
+                .thenReturn(Optional.of(sessao));
+        when(cpfValidacaoService.podeVotar("12345678901")).thenReturn(true);
         when(votoRepository.existsBySessaoPautaIdAndAssociadoCpf(1L, "12345678901")).thenReturn(false);
-
         when(votoRepository.save(any(Voto.class))).thenAnswer(i -> {
             Voto v = i.getArgument(0);
             ReflectionTestUtils.setField(v, "id", 500L);
@@ -75,13 +75,13 @@ public class VotoServiceTest {
         SessaoVotacao sessao = TestEntityFactory.criarSessao(pauta, 1);
 
         when(pautaRepository.findById(1L)).thenReturn(Optional.of(pauta));
-        when(sessaoRepository.findByPautaIdAndFimAfter(eq(1L), any())).thenReturn(Optional.of(sessao));
-        when(cpfValidacaoService.podeVotar(anyString())).thenReturn(true);
+        when(sessaoRepository.findByPautaIdAndFimAfter(eq(1L), any(LocalDateTime.class)))
+                .thenReturn(Optional.of(sessao));
+        when(cpfValidacaoService.podeVotar("12345678901")).thenReturn(true);
         when(votoRepository.existsBySessaoPautaIdAndAssociadoCpf(1L, "12345678901")).thenReturn(false);
-
         when(votoRepository.save(any(Voto.class))).thenAnswer(i -> {
             Voto v = i.getArgument(0);
-            ReflectionTestUtils.setField(v, "id", 500L);
+            ReflectionTestUtils.setField(v, "id", 501L);
             return v;
         });
 
@@ -95,38 +95,41 @@ public class VotoServiceTest {
     }
 
     @Test
-    @DisplayName("Lançar erro quando associado já votou na pauta")
-    void deveErroQuandoVotoDuplicado() {
+    @DisplayName("Lançar erro quando não há pauta com ID informado")
+    void deveErroQuandoPautaNaoExiste() {
         // GIVEN
-        VotoRequestDTO request = new VotoRequestDTO(1L, "12345678901", VotoValor.SIM);
-        Pauta pauta = TestEntityFactory.criarPauta(1L, "Pauta Teste");
-        SessaoVotacao sessao = TestEntityFactory.criarSessao(pauta, 1);
+        VotoRequestDTO request = new VotoRequestDTO(99L, "12345678901", VotoValor.SIM);
 
-        when(pautaRepository.findById(1L)).thenReturn(Optional.of(pauta));
-        when(sessaoRepository.findByPautaIdAndFimAfter(anyLong(), any())).thenReturn(Optional.of(sessao));
-        when(cpfValidacaoService.podeVotar(anyString())).thenReturn(true);
-        when(votoRepository.existsBySessaoPautaIdAndAssociadoCpf(1L, "12345678901")).thenReturn(true);
+        when(pautaRepository.findById(99L)).thenReturn(Optional.empty());
 
         // WHEN & THEN
-        BusinessException ex = assertThrows(BusinessException.class, () -> votoService.registrarVoto(request));
-        assertEquals(HttpStatus.CONFLICT, ex.getStatus());
-        assertTrue(ex.getFieldErrors().get("associadoId").contains("Já há um voto"));
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> votoService.registrarVoto(request));
+
+        assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
+        assertTrue(ex.getFieldErrors().get("pautaId").contains("Pauta não encontrada"));
+        verify(votoRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("Deve lançar erro quando CPF não está apto")
-    void deveErroQuandoCpfInapto() {
+    @DisplayName("Lançar erro quando não há sessão aberta para votar")
+    void deveErroQuandoSessaoNaoAberta() {
         // GIVEN
-        VotoRequestDTO request = new VotoRequestDTO(1L, "00000000000", VotoValor.SIM);
+        VotoRequestDTO request = new VotoRequestDTO(1L, "12345678901", VotoValor.SIM);
         Pauta pauta = TestEntityFactory.criarPauta(1L, "Pauta Teste");
 
-        when(pautaRepository.findById(anyLong())).thenReturn(Optional.of(pauta));
-        when(sessaoRepository.findByPautaIdAndFimAfter(anyLong(), any())).thenReturn(Optional.of(mock(SessaoVotacao.class)));
-        when(cpfValidacaoService.podeVotar("00000000000")).thenReturn(false);
+        when(pautaRepository.findById(1L)).thenReturn(Optional.of(pauta));
+        when(sessaoRepository.findByPautaIdAndFimAfter(eq(1L), any(LocalDateTime.class)))
+                .thenReturn(Optional.empty());
+        when(cpfValidacaoService.podeVotar("12345678901")).thenReturn(true);
+        when(votoRepository.existsBySessaoPautaIdAndAssociadoCpf(1L, "12345678901")).thenReturn(false);
 
         // WHEN & THEN
-        BusinessException ex = assertThrows(BusinessException.class, () -> votoService.registrarVoto(request));
-        assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> votoService.registrarVoto(request));
+
+        assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
+        assertTrue(ex.getFieldErrors().get("pautaId").contains("Não há sessão de votação aberta"));
         verify(votoRepository, never()).save(any());
     }
 }
