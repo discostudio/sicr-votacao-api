@@ -41,22 +41,31 @@ GET -> /api/v1/pautas/{id}/resultado ->	Obter resultado consolidado da pauta
 
 ## ==> DECISÕES TÉCNICAS  
 
-- Estruras das pastas  
+- Estruras das pastas   
   Organizei o projeto em controller, service, repository, model e dtos para seguir o princípio de separação de responsabilidades.
   Os controllers lidam apenas com HTTP, os services encapsulam regras de negócio, os repositories cuidam da persistência, as entidades do model representam o domínio, e os DTOs definem a interface pública da API.
   Isso deixa o projeto mais limpo, testável e escalável.  
   
+
 - Versionamento API  
   Escolhi versionamento via URL porque deixa explícita a versão para o cliente e facilita manutenção de múltiplas versões para cada controller.
+
 
 - Banco de dados  
   Escolhi banco relacional (MySQL) porque atende aos requisitos "centenas de milhares de votos" e "pautas e os votos sejam persistidos e que não sejam perdidos com o restart da aplicação".
   Além disso, os dados da aplicação são estruturados e têm relacionamentos claros (Pauta, Sessao, Voto).
   Também precisamos garantir consistência e integridade com transações ACID, e realizar consultas agregadas de forma eficiente, inclusive facilitando os uso de JPA/Hibernate.
 
+
 - Performance  
   Optei por otimizar o código e o banco através de avaliação de cenários n+1, priorizando queries customizadas em detrimento à queries padrão do Spring Data, nos repositories de Voto e Resultado, buscando maior controle e reduzir carga no banco.
   Também criei índices no banco pensando nas consultas realizadas.
+
+
+- Consulta serviço externo de validação do CPF  
+  O serviço atualmente está respondendo 404 com qualquer CPF, contradizendo o comportamento esperado de retornar 404 para CPF inválido.  
+  Fiz uma customização na consulta para diferenciar um 404 técnico (com HTML) de um 404 de validação do CPF, adquando o mais próximopossível a comportamento do serviço.  
+  Também criei um "callback" para o serviço externo, através de um mock que retorna ABLE_TO_VOTE para CPFs com um número par nos dois últimos dígitos, e UNABLE_TO_VOTE para CPFs com um número ímpar nos dois últimos dígitos.   
 
 ## ==> JOURNAL (passo a passo da implementação):
 
@@ -110,6 +119,14 @@ GET -> /api/v1/pautas/{id}/resultado ->	Obter resultado consolidado da pauta
 13 - Tarefa bônus: performance  
 -> Índices nas tabelas  
 -> queries customizadas no JPA
+
+## Melhorias futuras  
+
+Maior cobertura de testes unitários.
+
+Análise estática de código (com SonarQube, por exemplo).
+
+Testes de performance (com JMeter, por exemplo), quantificando a necessidade de ajustes de arquitetura e escalabilidade citados no próximo item. 
 
 ## Arquitetura e Escalabilidade
 
