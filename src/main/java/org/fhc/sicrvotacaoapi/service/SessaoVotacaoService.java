@@ -29,18 +29,18 @@ public class SessaoVotacaoService {
     }
 
     @Transactional
-    public SessaoResponseDTO abrirSessao(SessaoRequestDTO dto) {
+    public SessaoResponseDTO abrirSessao(SessaoRequestDTO sessaoRequest) {
 
         // Busca a pauta relacionada com a sessão a ser inserida
-        Pauta pauta = pautaRepository.findById(dto.pautaId())
+        Pauta pauta = pautaRepository.findById(sessaoRequest.pautaId())
                 .orElseThrow(() -> new BusinessException(
                                             "Não foi possível criar a sessão",
                                             HttpStatus.NOT_FOUND,
-                                            Map.of("pautaId", "Pauta não encontrada com o ID " + dto.pautaId())
+                                            Map.of("pautaId", "Pauta não encontrada com o ID " + sessaoRequest.pautaId())
                 ));
 
         // verifica se existe sessão aberta para a pauta
-        if (sessaoRepository.existsByPautaIdAndFimAfter(pauta.getId(), LocalDateTime.now())) {
+        if (sessaoRepository.existsSessaoAberta(sessaoRequest.pautaId(), LocalDateTime.now())) {
             throw new BusinessException(
                     "Não foi possível criar a sessão.",
                     HttpStatus.NOT_FOUND,
@@ -49,7 +49,7 @@ public class SessaoVotacaoService {
         }
 
         // define duração padrão de 1 minuto
-        int duracao = dto.duracaoEmMinutos() != null ? dto.duracaoEmMinutos() : 1;
+        int duracao = sessaoRequest.duracaoEmMinutos() != null ? sessaoRequest.duracaoEmMinutos() : 1;
 
         // define inicio e fim da sessão
         LocalDateTime inicio = LocalDateTime.now();

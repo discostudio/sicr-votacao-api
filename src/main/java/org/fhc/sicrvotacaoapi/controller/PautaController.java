@@ -16,6 +16,7 @@ import org.fhc.sicrvotacaoapi.dto.resultado.ResultadoVotacaoDTO;
 import org.fhc.sicrvotacaoapi.dto.resultado.ResultadoVotacaoDetalhadoDTO;
 import org.fhc.sicrvotacaoapi.service.PautaService;
 import org.fhc.sicrvotacaoapi.service.ResultadoVotacaoService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -104,10 +105,10 @@ public class PautaController {
                          ))
     })
     @GetMapping("/{pautaId}/resultadoDetalhado")
-    public ResponseEntity<ResultadoVotacaoDetalhadoDTO> obterResultadoDetalhado(@PathVariable Long pautaId) {
+    public ResponseEntity<ResultadoVotacaoDetalhadoDTO> obterResultadoDetalhado(@PathVariable Long pautaId, Pageable pageable) {
         log.info("PautaController: GET /api/v1/pautas/{}/resultadoConsolidado.", pautaId);
 
-        ResultadoVotacaoDetalhadoDTO resultadoVotacao = resultadoService.obterResultadoDetalhado(pautaId);
+        ResultadoVotacaoDetalhadoDTO resultadoVotacao = resultadoService.obterResultadoDetalhado(pautaId, pageable);
         return ResponseEntity.ok(resultadoVotacao);
     }
 

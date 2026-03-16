@@ -38,21 +38,12 @@ public class VotoService {
     @Transactional
     public VotoResponseDTO registrarVoto(VotoRequestDTO votoRequest) {
 
-        // Busca a pauta
+        // Verifica a existência da pauta
         Pauta pauta = pautaRepository.findById(votoRequest.pautaId())
                 .orElseThrow(() -> new BusinessException(
                         "Não foi possível registrar o voto.",
                         HttpStatus.NOT_FOUND,
                         Map.of("pautaId", "Pauta não encontrada com o ID " + votoRequest.pautaId())
-                ));
-
-        // buscar sessão aberta da pauta
-        SessaoVotacao sessaoAberta = sessaoRepository
-                .findByPautaIdAndFimAfter(pauta.getId(), LocalDateTime.now())
-                .orElseThrow(() -> new BusinessException(
-                        "Não foi possível registrar o voto.",
-                        HttpStatus.NOT_FOUND,
-                        Map.of("pautaId", "Não há sessão de votação aberta para a pauta com o ID " + pauta.getId())
                 ));
 
         // Validar pelo CPF do associado se ele pode votar
@@ -66,13 +57,22 @@ public class VotoService {
         }
 
         // Validar se associado já votou na pauta (na sessão atual ou em sessões anteriores)
-        if (votoRepository.existsBySessaoPautaIdAndAssociadoCpf(pauta.getId(), votoRequest.associadoCPF())) {
+        if (votoRepository.existsBySessaoPautaIdAndAssociadoCpf(votoRequest.pautaId(), votoRequest.associadoCPF())) {
             throw new BusinessException(
                     "Não foi possível registrar o voto.",
                     HttpStatus.CONFLICT,
                     Map.of("associadoId", "Já há um voto na pauta para o associado com o CPF " + votoRequest.associadoCPF())
             );
         }
+
+        // buscar sessão aberta da pauta
+        SessaoVotacao sessaoAberta = sessaoRepository
+                .findByPautaIdAndFimAfter(votoRequest.pautaId(), LocalDateTime.now())
+                .orElseThrow(() -> new BusinessException(
+                        "Não foi possível registrar o voto.",
+                        HttpStatus.NOT_FOUND,
+                        Map.of("pautaId", "Não há sessão de votação aberta para a pauta com o ID " + votoRequest.pautaId())
+                ));
 
         Voto voto = new Voto(sessaoAberta, pauta, votoRequest.associadoCPF(), votoRequest.valor());
         voto = votoRepository.save(voto);
