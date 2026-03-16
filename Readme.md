@@ -80,9 +80,9 @@ Request
 "associadoCPF": "12345678912",  
 "valor": "SIM"  
 }
-**OBS.** 
-Dado que a API de validação externa não está com o comportamento esperado, o mock de callback está ativado no application.yml (external-services.cpf-validator.use-mock-on-failure: true), retornando ABLE_TO_VOTE para CPFs com um número par nos dois últimos dígitos, e UNABLE_TO_VOTE para CPFs com um número ímpar nos dois últimos dígitos (a formatação do CPF não está sendo validada, para fins de simplicidade).
-Para desativar a validação e permitir o voto para qualquer CPF, pode desabilitar a validação no application.yml (external-services.cpf-validator.enabled: false).
+**OBS.**  
+Dado que a API de validação externa não está com o comportamento esperado, o mock de callback está ativado no application.yml (external-services.cpf-validator.use-mock-on-failure: true), retornando ABLE_TO_VOTE para CPFs com um número par nos dois últimos dígitos, e UNABLE_TO_VOTE para CPFs com um número ímpar nos dois últimos dígitos (a formatação do CPF não está sendo validada, para fins de simplicidade).  
+Para desativar a validação e permitir o voto para qualquer CPF, pode desabilitar a validação no application.yml (external-services.cpf-validator.enabled: false).  
 
 Response  
 {  
