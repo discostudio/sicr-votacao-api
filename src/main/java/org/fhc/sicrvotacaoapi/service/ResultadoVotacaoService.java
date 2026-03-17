@@ -32,7 +32,7 @@ public class ResultadoVotacaoService {
     private final SessaoVotacaoRepository sessaoRepository;
     private final VotoRepository votoRepository;
     private final PautaRepository pautaRepository;
-    private final SessaoVotacaoService sessaoService;
+    //private final SessaoVotacaoService sessaoService;
 
     public ResultadoVotacaoService(SessaoVotacaoRepository sessaoRepository,
                                    VotoRepository votoRepository,
@@ -41,7 +41,7 @@ public class ResultadoVotacaoService {
         this.sessaoRepository = sessaoRepository;
         this.votoRepository = votoRepository;
         this.pautaRepository = pautaRepository;
-        this.sessaoService = sessaoService;
+        //this.sessaoService = sessaoService;
     }
 
     public ResultadoVotacaoDetalhadoDTO obterResultadoDetalhado(Long pautaId, Pageable pageable) {
@@ -81,32 +81,7 @@ public class ResultadoVotacaoService {
     }
 
     public ResultadoVotacaoDTO obterResultado(Long pautaId) {
-        /*List<SessaoVotacao> sessoes = buscarSessoesDaPauta(pautaId);
 
-        // PERFORMANCE: Busca os totais SIM/NAO agrupados em uma ÚNICA query ao banco.
-        List<Object[]> resultadosBrutos = votoRepository.countVotosGroupByValor(pautaId);
-
-        long totalSim = 0;
-        long totalNao = 0;
-
-        // Processa o resultado da query agrupada
-        for (Object[] linha : resultadosBrutos) {
-            VotoValor valor = (VotoValor) linha[0];
-            long count = (long) linha[1];
-
-            if (VotoValor.SIM.equals(valor)) totalSim = count;
-            else if (VotoValor.NAO.equals(valor)) totalNao = count;
-        }
-
-        validaVotosEmSessoes(totalSim, totalNao, pautaId);
-
-        log.info("ResultadoVotacaoService: retornando resultado da pauta", pautaId);
-
-        return new ResultadoVotacaoDTO(
-                pautaId,
-                calcularResultado(totalSim, totalNao),
-                possuiSessoesAbertas(pautaId)
-        );*/
         // Valida se existe
         buscarSessoesDaPauta(pautaId);
 
@@ -179,7 +154,7 @@ public class ResultadoVotacaoService {
     }
 
     private boolean possuiSessoesAbertas(Long pautaId) {
-        return sessaoRepository.existsSessaoAberta(pautaId, LocalDateTime.now());
+        return sessaoRepository.existsByPautaIdAndFimAfter(pautaId, LocalDateTime.now());
     }
 
     private ResultadoVotacao calcularResultado(long totalSim, long totalNao) {
@@ -193,14 +168,6 @@ public class ResultadoVotacaoService {
         long soma() { return totalSim + totalNao; }
     }
 
-    // Classe auxiliar interna (Helper) apenas para mutabilidade durante o processamento do loop
-   // @Getter
-    //@Setter
-   // private static class TotaisVotosPorSessao {
-   //     private long sim = 0;
-   //     private long nao = 0;
-    //}
-
     private TotaisVotos buscarTotaisGerais(Long pautaId) {
         List<Object[]> resultados = votoRepository.countVotosGroupByValor(pautaId);
         long sim = 0;
@@ -212,38 +179,6 @@ public class ResultadoVotacaoService {
         return new TotaisVotos(sim, nao);
     }
 
-    /*private Map<Long, TotaisVotos> buscarTotaisAgrupadosPorSessao(List<Long> idsSessoes) {
-        if (idsSessoes.isEmpty()) {
-            return Collections.emptyMap();
-        }
-
-        List<Object[]> resultadosBrutos = votoRepository.countVotosAgrupadosPorSessoes(idsSessoes);
-
-        // Mapa para armazenar: SessaoID -> Objeto com contagem de SIM e NAO
-        Map<Long, TotaisVotosPorSessao> processamento = new HashMap<>();
-
-        for (Object[] linha : resultadosBrutos) {
-            Long sessaoId = (Long) linha[0];
-            VotoValor valor = (VotoValor) linha[1];
-            Long count = (Long) linha[2];
-
-            // Obtém o acumulador daquela sessão ou cria um novo
-            TotaisVotosPorSessao totais = processamento.computeIfAbsent(sessaoId, k -> new TotaisVotosPorSessao());
-
-            if (VotoValor.SIM.equals(valor)) {
-                totais.setSim(count);
-            } else if (VotoValor.NAO.equals(valor)) {
-                totais.setNao(count);
-            }
-        }
-
-        // Converte o processamento para o Record imutável TotaisVotos
-        return processamento.entrySet().stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        e -> new TotaisVotos(e.getValue().getSim(), e.getValue().getNao())
-                ));
-    }*/
     private Map<Long, TotaisVotos> buscarTotaisAgrupadosPorSessao(List<Long> idsSessoes) {
         if (idsSessoes.isEmpty()) return Collections.emptyMap();
 

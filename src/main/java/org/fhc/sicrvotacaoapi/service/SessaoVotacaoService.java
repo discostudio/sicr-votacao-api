@@ -40,7 +40,7 @@ public class SessaoVotacaoService {
                 ));
 
         // verifica se existe sessão aberta para a pauta
-        if (sessaoRepository.existsSessaoAberta(sessaoRequest.pautaId(), LocalDateTime.now())) {
+        if (sessaoRepository.existsByPautaIdAndFimAfter(sessaoRequest.pautaId(), LocalDateTime.now())) {
             throw new BusinessException(
                     "Não foi possível criar a sessão.",
                     HttpStatus.NOT_FOUND,
@@ -49,7 +49,10 @@ public class SessaoVotacaoService {
         }
 
         // define duração padrão de 1 minuto
-        int duracao = sessaoRequest.duracaoEmMinutos() != null ? sessaoRequest.duracaoEmMinutos() : 1;
+        // FEAT-123: ajusta duração contemplando cenários de valor 0 ou negativos - padrão 1 (controller já valida, mas garantindo na service)
+        int duracao = (sessaoRequest.duracaoEmMinutos() == null || sessaoRequest.duracaoEmMinutos() <= 0)
+                ? 1
+                : sessaoRequest.duracaoEmMinutos();
 
         // define inicio e fim da sessão
         LocalDateTime inicio = LocalDateTime.now();

@@ -1,24 +1,38 @@
 services:
-  mysql-db:
-    image: mysql:8.0
-    container_name: sicr-database
-    restart: always
+  #mysql-db:
+  #  image: mysql:8.0
+  #  container_name: sicr-database
+  #  restart: always
     # FORÇA O PADRÃO DE SENHA COMPATÍVEL
-    command: --default-authentication-plugin=mysql_native_password
+  #  command: --default-authentication-plugin=mysql_native_password
+  #  environment:
+  #    MYSQL_DATABASE: votacao_db
+  #    MYSQL_USER: uservotacao
+  #    MYSQL_PASSWORD: passvotacao123
+  #    MYSQL_ROOT_PASSWORD: passroot
+  #  ports:
+  #    - "3306:3306"
+  #  volumes:
+  #    - mysql_data:/var/lib/mysql
+  #  healthcheck:
+  #    test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+  #    interval: 5s
+  #    timeout: 2s
+  #    retries: 10
+
+  mariadb:
+    image: mariadb:11
+    container_name: sicr-mariadb
+    restart: always
     environment:
-      MYSQL_DATABASE: votacao_db
-      MYSQL_USER: uservotacao
-      MYSQL_PASSWORD: passvotacao123
-      MYSQL_ROOT_PASSWORD: passroot
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: votacao
+      MYSQL_USER: votacao
+      MYSQL_PASSWORD: votacao
     ports:
       - "3306:3306"
     volumes:
-      - mysql_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 5s
-      timeout: 2s
-      retries: 10
+      - mariadb_data:/var/lib/mysql
 
   app-votacao:
     build: .
@@ -37,4 +51,5 @@ services:
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
 
 volumes:
-  mysql_data:
+  #mysql_data:
+  mariadb_data:
