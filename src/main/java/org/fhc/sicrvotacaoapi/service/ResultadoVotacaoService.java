@@ -32,16 +32,13 @@ public class ResultadoVotacaoService {
     private final SessaoVotacaoRepository sessaoRepository;
     private final VotoRepository votoRepository;
     private final PautaRepository pautaRepository;
-    //private final SessaoVotacaoService sessaoService;
 
     public ResultadoVotacaoService(SessaoVotacaoRepository sessaoRepository,
                                    VotoRepository votoRepository,
-                                   PautaRepository pautaRepository,
-                                   SessaoVotacaoService sessaoService) {
+                                   PautaRepository pautaRepository) {
         this.sessaoRepository = sessaoRepository;
         this.votoRepository = votoRepository;
         this.pautaRepository = pautaRepository;
-        //this.sessaoService = sessaoService;
     }
 
     public ResultadoVotacaoDetalhadoDTO obterResultadoDetalhado(Long pautaId, Pageable pageable) {
@@ -82,9 +79,10 @@ public class ResultadoVotacaoService {
 
     public ResultadoVotacaoDTO obterResultado(Long pautaId) {
 
-        // Valida se existe
-        buscarSessoesDaPauta(pautaId);
+        // Valida se existe pauta e sessões
+        validaPautaSessao(pautaId);
 
+        // busca os totais gerais da pauta
         TotaisVotos totais = buscarTotaisGerais(pautaId);
         validaVotosEmSessoes(totais.totalSim(), totais.totalNao(), pautaId);
 
@@ -100,15 +98,12 @@ public class ResultadoVotacaoService {
     private Page<SessaoVotacao> buscarSessoesDaPautaComPaginacao(Long pautaId, Pageable pageable) {
 
         // Busca a pauta
-        pautaRepository.findById(pautaId)
-                .orElseThrow(() -> new BusinessException(
-                        "Pauta não encontrada.",
-                        HttpStatus.NOT_FOUND,
-                        Map.of("pautaId", "Não há pauta com o ID " + pautaId)
-                ));
+        validaPauta(pautaId);
 
+        // busca as sessões da pauta - com paginação
         Page<SessaoVotacao> sessoesPaginadas = sessaoRepository.findAllByPautaIdOrderByFimAsc(pautaId, pageable);
 
+        // valida se existem sessões abertas para a pauta
         if (sessoesPaginadas.isEmpty()) {
             throw new BusinessException(
                     "Sessão não encontrada.",
@@ -120,18 +115,15 @@ public class ResultadoVotacaoService {
         return sessoesPaginadas;
     }
 
-    private List<SessaoVotacao> buscarSessoesDaPauta(Long pautaId) {
+    private void validaPautaSessao(Long pautaId) {
 
         // Busca a pauta
-        pautaRepository.findById(pautaId)
-                .orElseThrow(() -> new BusinessException(
-                        "Pauta não encontrada.",
-                        HttpStatus.NOT_FOUND,
-                        Map.of("pautaId", "Não há pauta com o ID " + pautaId)
-                ));
+        validaPauta(pautaId);
 
+        // Busca as sessões da pauta
         List<SessaoVotacao> sessoes = sessaoRepository.findAllByPautaIdOrderByFimAsc(pautaId);
 
+        // valida se existem sessões abertas para a pauta
         if (sessoes.isEmpty()) {
             throw new BusinessException(
                     "Sessão não encontrada.",
@@ -139,8 +131,16 @@ public class ResultadoVotacaoService {
                     Map.of("pautaId", "Não há sessão para a pauta " + pautaId)
             );
         }
+    }
 
-        return sessoes;
+    private void validaPauta(Long pautaId) {
+        // Busca a pauta
+        pautaRepository.findById(pautaId)
+                .orElseThrow(() -> new BusinessException(
+                        "Pauta não encontrada.",
+                        HttpStatus.NOT_FOUND,
+                        Map.of("pautaId", "Não há pauta com o ID " + pautaId)
+                ));
     }
 
     private void validaVotosEmSessoes(Long totalSim, Long totalNao, Long pautaId) {
