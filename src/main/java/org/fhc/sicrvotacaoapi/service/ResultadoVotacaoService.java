@@ -13,6 +13,7 @@ import org.fhc.sicrvotacaoapi.model.VotoValor;
 import org.fhc.sicrvotacaoapi.repository.PautaRepository;
 import org.fhc.sicrvotacaoapi.repository.SessaoVotacaoRepository;
 import org.fhc.sicrvotacaoapi.repository.VotoRepository;
+import org.fhc.sicrvotacaoapi.repository.projection.TotaisPorSessaoProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -182,21 +183,16 @@ public class ResultadoVotacaoService {
     private Map<Long, TotaisVotos> buscarTotaisAgrupadosPorSessao(List<Long> idsSessoes) {
         if (idsSessoes.isEmpty()) return Collections.emptyMap();
 
-        return votoRepository.countVotosAgrupadosPorSessoes(idsSessoes).stream()
-                .collect(Collectors.groupingBy(
-                        linha -> (Long) linha[0], // Agrupa pelo SessaoID
-                        Collectors.collectingAndThen(
-                                Collectors.toList(),
-                                lista -> {
-                                    long sim = lista.stream()
-                                            .filter(l -> VotoValor.SIM.equals(l[1]))
-                                            .mapToLong(l -> (long) l[2]).findFirst().orElse(0L);
-                                    long nao = lista.stream()
-                                            .filter(l -> VotoValor.NAO.equals(l[1]))
-                                            .mapToLong(l -> (long) l[2]).findFirst().orElse(0L);
-                                    return new TotaisVotos(sim, nao);
-                                }
+        return votoRepository.countVotosPorSessao(idsSessoes)
+                .stream()
+                .collect(Collectors.toMap(
+                        TotaisPorSessaoProjection::getSessaoId,
+                        p -> new TotaisVotos(
+                                p.getTotalSim() != null ? p.getTotalSim() : 0L,
+                                p.getTotalNao() != null ? p.getTotalNao() : 0L
                         )
                 ));
     }
 }
+
+

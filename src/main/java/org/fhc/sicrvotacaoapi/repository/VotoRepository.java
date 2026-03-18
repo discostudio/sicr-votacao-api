@@ -2,6 +2,7 @@ package org.fhc.sicrvotacaoapi.repository;
 
 import org.fhc.sicrvotacaoapi.model.Voto;
 import org.fhc.sicrvotacaoapi.model.VotoValor;
+import org.fhc.sicrvotacaoapi.repository.projection.TotaisPorSessaoProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -24,6 +25,17 @@ public interface VotoRepository extends JpaRepository<Voto, Long> {
     List<Object[]> countVotosGroupByValor(@Param("pautaId") Long pautaId);
 
     // Quantidade de votos nas sessões
-    @Query("SELECT v.sessao.id, v.valor, COUNT(v) FROM Voto v WHERE v.sessao.id IN :sessaoIds GROUP BY v.sessao.id, v.valor")
-    List<Object[]> countVotosAgrupadosPorSessoes(@Param("sessaoIds") List<Long> sessaoIds);
+    //@Query("SELECT v.sessao.id, v.valor, COUNT(v) FROM Voto v WHERE v.sessao.id IN :sessaoIds GROUP BY v.sessao.id, v.valor")
+    //List<Object[]> countVotosAgrupadosPorSessoes(@Param("sessaoIds") List<Long> sessaoIds);
+
+    @Query("""
+        SELECT 
+            v.sessao.id AS sessaoId,
+            SUM(CASE WHEN v.valor = 'SIM' THEN 1 ELSE 0 END) AS totalSim,
+            SUM(CASE WHEN v.valor = 'NAO' THEN 1 ELSE 0 END) AS totalNao
+        FROM Voto v
+        WHERE v.sessao.id IN :idsSessoes
+        GROUP BY v.sessao.id
+    """)
+    List<TotaisPorSessaoProjection> countVotosPorSessao(List<Long> idsSessoes);
 }
