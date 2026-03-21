@@ -12,22 +12,13 @@ import java.util.Optional;
 
 public interface VotoRepository extends JpaRepository<Voto, Long> {
 
-    // Conta todos os votos de uma sessão
-    long countBySessaoId(Long sessaoId);
-
     // Verifica se o associado já votou na pauta
     boolean existsBySessaoPautaIdAndAssociadoCpf(Long pautaId, String associadoCpf);
-
-    // quantos votos de um tipo específico (“SIM” ou “NÃO”) foram registrados em uma sessão de votação
-    long countBySessaoIdAndValor(Long sessaoId, VotoValor valor);
 
     @Query("SELECT v.valor, COUNT(v) FROM Voto v WHERE v.sessao.pauta.id = :pautaId GROUP BY v.valor")
     List<Object[]> countVotosGroupByValor(@Param("pautaId") Long pautaId);
 
     // Quantidade de votos nas sessões
-    //@Query("SELECT v.sessao.id, v.valor, COUNT(v) FROM Voto v WHERE v.sessao.id IN :sessaoIds GROUP BY v.sessao.id, v.valor")
-    //List<Object[]> countVotosAgrupadosPorSessoes(@Param("sessaoIds") List<Long> sessaoIds);
-
     @Query("""
         SELECT 
             v.sessao.id AS sessaoId,

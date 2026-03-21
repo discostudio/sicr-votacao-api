@@ -17,9 +17,6 @@ public interface SessaoVotacaoRepository extends JpaRepository<SessaoVotacao, Lo
     // FEAT-123: reomve query customizada após verificar não efetividade em performance
     boolean existsByPautaIdAndFimAfter(Long pautaId, LocalDateTime now);
 
-    //@Query("SELECT COUNT(s) > 0 FROM SessaoVotacao s WHERE s.pauta.id = :pautaId AND s.fim > :dataNow")
-    //boolean existsSessaoAberta(@Param("pautaId") Long pautaId, @Param("dataNow") LocalDateTime now);
-
     // Busca a sessão de votação aberta para uma pauta
     Optional<SessaoVotacao> findByPautaIdAndFimAfter(Long pautaId, LocalDateTime agora);
 
